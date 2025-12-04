@@ -61,14 +61,38 @@ serve(async (req) => {
     }
 
     if (newsData.articles) {
-      console.log(`Found ${newsData.articles.length} articles`);
+      console.log(`Found ${newsData.articles.length} articles before filtering`);
+      
+      // Football-related keywords for strict filtering
+      const footballKeywords = [
+        'football', 'soccer', 'premier league', 'la liga', 'bundesliga', 'serie a', 'ligue 1',
+        'champions league', 'europa league', 'world cup', 'euro 2024', 'euro 2028',
+        'transfer', 'goal', 'striker', 'midfielder', 'defender', 'goalkeeper',
+        'manager', 'coach', 'match', 'fixture', 'stadium', 'penalty', 'red card', 'yellow card',
+        'offside', 'var', 'referee', 'kick-off', 'halftime', 'fulltime',
+        'messi', 'ronaldo', 'mbappe', 'haaland', 'bellingham', 'vinicius', 'salah', 'de bruyne',
+        'manchester united', 'manchester city', 'liverpool', 'arsenal', 'chelsea', 'tottenham',
+        'real madrid', 'barcelona', 'atletico madrid', 'bayern munich', 'borussia dortmund',
+        'psg', 'juventus', 'inter milan', 'ac milan', 'napoli',
+        'fifa', 'uefa', 'fa cup', 'carabao cup', 'copa del rey', 'dfb pokal',
+        'qualification', 'qualifier', 'group stage', 'knockout', 'semi-final', 'final',
+        'clean sheet', 'hat-trick', 'assist', 'tackle', 'dribble', 'header'
+      ];
       
       newsData.articles.forEach((article: any, index: number) => {
-        // Determine category based on content
-        let articleCategory = 'Football News';
         const titleLower = (article.title || '').toLowerCase();
         const descLower = (article.description || '').toLowerCase();
         const content = titleLower + ' ' + descLower;
+        
+        // Skip articles that don't contain football-related keywords
+        const isFootballRelated = footballKeywords.some(keyword => content.includes(keyword));
+        if (!isFootballRelated) {
+          console.log(`Filtered out non-football article: ${article.title?.substring(0, 50)}`);
+          return;
+        }
+        
+        // Determine category based on content
+        let articleCategory = 'Football News';
 
         if (content.includes('world cup') || content.includes('qualifier') || content.includes('qualification')) {
           articleCategory = 'World Cup 2026';

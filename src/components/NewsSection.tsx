@@ -13,6 +13,7 @@ interface NewsItem {
   date: string;
   image?: string;
   type: string;
+  url?: string;
 }
 
 const NewsSection = () => {
@@ -149,6 +150,7 @@ const NewsSection = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: 0.1 * index }}
                     className="glass-card p-4 hover-lift cursor-pointer group"
+                    onClick={() => item.url && window.open(item.url, '_blank')}
                   >
                     <span className="text-xs text-primary font-medium uppercase tracking-wider">
                       {item.category}
@@ -184,6 +186,7 @@ const NewsSection = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 * index }}
                   className="glass-card p-5 hover-lift group cursor-pointer"
+                  onClick={() => item.url && window.open(item.url, '_blank')}
                 >
                   <div className="flex items-start gap-4">
                     {item.image && (

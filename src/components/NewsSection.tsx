@@ -47,7 +47,7 @@ const NewsSection = () => {
           item.category !== 'World Cup 2026' && item.type !== 'worldcup'
         );
         
-        setWorldCupNews(wcNews.slice(0, 3));
+        setWorldCupNews(wcNews.slice(0, 2));
         setOtherNews(other.slice(0, 4));
       }
     } catch (error) {

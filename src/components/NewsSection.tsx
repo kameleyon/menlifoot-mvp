@@ -40,8 +40,12 @@ const NewsSection = () => {
       
       if (result.success && result.news) {
         // Split news into World Cup and other categories
-        const wcNews = result.news.filter((item: NewsItem) => item.type === 'worldcup');
-        const other = result.news.filter((item: NewsItem) => item.type !== 'worldcup');
+        const wcNews = result.news.filter((item: NewsItem) => 
+          item.category === 'World Cup 2026' || item.type === 'worldcup'
+        );
+        const other = result.news.filter((item: NewsItem) => 
+          item.category !== 'World Cup 2026' && item.type !== 'worldcup'
+        );
         
         setWorldCupNews(wcNews.slice(0, 3));
         setOtherNews(other.slice(0, 3));

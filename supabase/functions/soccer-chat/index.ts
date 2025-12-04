@@ -30,7 +30,7 @@ serve(async (req) => {
         'X-Title': 'Menlifoot Soccer AI'
       },
       body: JSON.stringify({
-        model: 'openai/gpt-4.1',
+        model: 'openai/gpt-5.1',
         messages: [
           {
             role: 'system',

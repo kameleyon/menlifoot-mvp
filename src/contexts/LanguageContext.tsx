@@ -18,14 +18,14 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.store': 'Store',
     'nav.signIn': 'Sign In',
     
-    // Hero Section
-    'hero.tagline': 'Your Soccer Companion',
-    'hero.title1': 'The Beautiful',
-    'hero.title2': 'Game',
-    'hero.title3': 'Reimagined',
-    'hero.description': 'Your ultimate destination for soccer content, analysis, and community. Join thousands of fans worldwide.',
-    'hero.cta': 'Explore Now',
-    'hero.watchPodcast': 'Watch Podcast',
+    // Hero/Podcast Section
+    'hero.newEpisode': 'New Episode Available',
+    'hero.podcast': 'Podcast',
+    'hero.podcastDescription': 'Dive deep into the beautiful game with expert analysis, player interviews, and match breakdowns from the world\'s biggest leagues.',
+    'hero.listenNow': 'Listen Now',
+    'hero.browseEpisodes': 'Browse Episodes',
+    'hero.episodeTitle': 'World Cup 2026 Preview',
+    'hero.episodeInfo': 'Episode 47 • 45 min',
     
     // News Section
     'news.liveUpdates': 'Live Updates',
@@ -78,9 +78,23 @@ const translations: Record<Language, Record<string, string>> = {
     'ai.greeting': 'Hey! I\'m your soccer companion. Ask me anything about the beautiful game!',
     
     // Footer
-    'footer.tagline': 'Your ultimate soccer companion for news, analysis, and community.',
-    'footer.quickLinks': 'Quick Links',
-    'footer.connect': 'Connect',
+    'footer.tagline': 'Your ultimate soccer companion. Stay connected with the beautiful game through podcasts, news, and community.',
+    'footer.company': 'Company',
+    'footer.content': 'Content',
+    'footer.support': 'Support',
+    'footer.aboutUs': 'About Us',
+    'footer.careers': 'Careers',
+    'footer.press': 'Press',
+    'footer.contact': 'Contact',
+    'footer.podcast': 'Podcast',
+    'footer.news': 'News',
+    'footer.videos': 'Videos',
+    'footer.newsletter': 'Newsletter',
+    'footer.helpCenter': 'Help Center',
+    'footer.privacyPolicy': 'Privacy Policy',
+    'footer.termsOfService': 'Terms of Service',
+    'footer.cookiePolicy': 'Cookie Policy',
+    'footer.emailPlaceholder': 'Enter your email',
     'footer.rights': 'All rights reserved.',
     
     // Splash
@@ -95,14 +109,14 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.store': 'Boutique',
     'nav.signIn': 'Connexion',
     
-    // Hero Section
-    'hero.tagline': 'Votre Compagnon Football',
-    'hero.title1': 'Le Beau',
-    'hero.title2': 'Jeu',
-    'hero.title3': 'Réinventé',
-    'hero.description': 'Votre destination ultime pour le contenu, l\'analyse et la communauté du football. Rejoignez des milliers de fans à travers le monde.',
-    'hero.cta': 'Explorer',
-    'hero.watchPodcast': 'Voir le Podcast',
+    // Hero/Podcast Section
+    'hero.newEpisode': 'Nouvel Épisode Disponible',
+    'hero.podcast': 'Podcast',
+    'hero.podcastDescription': 'Plongez dans le beau jeu avec des analyses d\'experts, des interviews de joueurs et des analyses de matchs des plus grandes ligues du monde.',
+    'hero.listenNow': 'Écouter',
+    'hero.browseEpisodes': 'Parcourir les Épisodes',
+    'hero.episodeTitle': 'Aperçu Coupe du Monde 2026',
+    'hero.episodeInfo': 'Épisode 47 • 45 min',
     
     // News Section
     'news.liveUpdates': 'Mises à Jour en Direct',
@@ -155,9 +169,23 @@ const translations: Record<Language, Record<string, string>> = {
     'ai.greeting': 'Salut! Je suis votre compagnon football. Demandez-moi n\'importe quoi sur le beau jeu!',
     
     // Footer
-    'footer.tagline': 'Votre compagnon football ultime pour les actualités, analyses et communauté.',
-    'footer.quickLinks': 'Liens Rapides',
-    'footer.connect': 'Connecter',
+    'footer.tagline': 'Votre compagnon football ultime. Restez connecté au beau jeu grâce aux podcasts, actualités et communauté.',
+    'footer.company': 'Entreprise',
+    'footer.content': 'Contenu',
+    'footer.support': 'Support',
+    'footer.aboutUs': 'À Propos',
+    'footer.careers': 'Carrières',
+    'footer.press': 'Presse',
+    'footer.contact': 'Contact',
+    'footer.podcast': 'Podcast',
+    'footer.news': 'Actualités',
+    'footer.videos': 'Vidéos',
+    'footer.newsletter': 'Newsletter',
+    'footer.helpCenter': 'Centre d\'Aide',
+    'footer.privacyPolicy': 'Politique de Confidentialité',
+    'footer.termsOfService': 'Conditions d\'Utilisation',
+    'footer.cookiePolicy': 'Politique des Cookies',
+    'footer.emailPlaceholder': 'Entrez votre email',
     'footer.rights': 'Tous droits réservés.',
     
     // Splash
@@ -172,14 +200,14 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.store': 'Tienda',
     'nav.signIn': 'Iniciar Sesión',
     
-    // Hero Section
-    'hero.tagline': 'Tu Compañero de Fútbol',
-    'hero.title1': 'El Hermoso',
-    'hero.title2': 'Juego',
-    'hero.title3': 'Reinventado',
-    'hero.description': 'Tu destino definitivo para contenido, análisis y comunidad de fútbol. Únete a miles de aficionados en todo el mundo.',
-    'hero.cta': 'Explorar',
-    'hero.watchPodcast': 'Ver Podcast',
+    // Hero/Podcast Section
+    'hero.newEpisode': 'Nuevo Episodio Disponible',
+    'hero.podcast': 'Podcast',
+    'hero.podcastDescription': 'Sumérgete en el hermoso juego con análisis de expertos, entrevistas a jugadores y resúmenes de partidos de las ligas más grandes del mundo.',
+    'hero.listenNow': 'Escuchar',
+    'hero.browseEpisodes': 'Ver Episodios',
+    'hero.episodeTitle': 'Adelanto Copa del Mundo 2026',
+    'hero.episodeInfo': 'Episodio 47 • 45 min',
     
     // News Section
     'news.liveUpdates': 'Actualizaciones en Vivo',
@@ -232,9 +260,23 @@ const translations: Record<Language, Record<string, string>> = {
     'ai.greeting': '¡Hola! Soy tu compañero de fútbol. ¡Pregúntame lo que quieras sobre el hermoso juego!',
     
     // Footer
-    'footer.tagline': 'Tu compañero definitivo de fútbol para noticias, análisis y comunidad.',
-    'footer.quickLinks': 'Enlaces Rápidos',
-    'footer.connect': 'Conectar',
+    'footer.tagline': 'Tu compañero definitivo de fútbol. Mantente conectado con el hermoso juego a través de podcasts, noticias y comunidad.',
+    'footer.company': 'Empresa',
+    'footer.content': 'Contenido',
+    'footer.support': 'Soporte',
+    'footer.aboutUs': 'Sobre Nosotros',
+    'footer.careers': 'Carreras',
+    'footer.press': 'Prensa',
+    'footer.contact': 'Contacto',
+    'footer.podcast': 'Podcast',
+    'footer.news': 'Noticias',
+    'footer.videos': 'Videos',
+    'footer.newsletter': 'Boletín',
+    'footer.helpCenter': 'Centro de Ayuda',
+    'footer.privacyPolicy': 'Política de Privacidad',
+    'footer.termsOfService': 'Términos de Servicio',
+    'footer.cookiePolicy': 'Política de Cookies',
+    'footer.emailPlaceholder': 'Ingresa tu email',
     'footer.rights': 'Todos los derechos reservados.',
     
     // Splash
@@ -249,14 +291,14 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.store': 'Boutik',
     'nav.signIn': 'Konekte',
     
-    // Hero Section
-    'hero.tagline': 'Patnè Foutbòl Ou',
-    'hero.title1': 'Bèl',
-    'hero.title2': 'Jwèt',
-    'hero.title3': 'La',
-    'hero.description': 'Destinasyon final ou pou kontni, analiz ak kominote foutbòl. Rejwenn dè milye fanatik nan mond lan.',
-    'hero.cta': 'Eksplore',
-    'hero.watchPodcast': 'Gade Podcast',
+    // Hero/Podcast Section
+    'hero.newEpisode': 'Nouvo Epizòd Disponib',
+    'hero.podcast': 'Podcast',
+    'hero.podcastDescription': 'Plonje nan bèl jwèt la ak analiz ekspè, entèvyou jwè, ak rezime match nan pi gwo lig nan mond lan.',
+    'hero.listenNow': 'Koute Kounye a',
+    'hero.browseEpisodes': 'Wè Epizòd yo',
+    'hero.episodeTitle': 'Apèsi Koup di Mond 2026',
+    'hero.episodeInfo': 'Epizòd 47 • 45 min',
     
     // News Section
     'news.liveUpdates': 'Mizajou an Dirèk',
@@ -309,9 +351,23 @@ const translations: Record<Language, Record<string, string>> = {
     'ai.greeting': 'Sak pase! Mwen se patnè foutbòl ou. Mande m nenpòt bagay sou bèl jwèt la!',
     
     // Footer
-    'footer.tagline': 'Patnè foutbòl final ou pou nouvèl, analiz ak kominote.',
-    'footer.quickLinks': 'Lyen Rapid',
-    'footer.connect': 'Konekte',
+    'footer.tagline': 'Patnè foutbòl final ou. Rete konekte ak bèl jwèt la atravè podcast, nouvèl, ak kominote.',
+    'footer.company': 'Konpayi',
+    'footer.content': 'Kontni',
+    'footer.support': 'Sipò',
+    'footer.aboutUs': 'Konsènan Nou',
+    'footer.careers': 'Karyè',
+    'footer.press': 'Laprès',
+    'footer.contact': 'Kontakte',
+    'footer.podcast': 'Podcast',
+    'footer.news': 'Nouvèl',
+    'footer.videos': 'Videyo',
+    'footer.newsletter': 'Bilten',
+    'footer.helpCenter': 'Sant Èd',
+    'footer.privacyPolicy': 'Règ Konfidansyalite',
+    'footer.termsOfService': 'Kondisyon Sèvis',
+    'footer.cookiePolicy': 'Règ Cookie',
+    'footer.emailPlaceholder': 'Antre imèl ou',
     'footer.rights': 'Tout dwa rezève.',
     
     // Splash

@@ -115,20 +115,15 @@ const HeroSection = () => {
               <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="relative"
               >
                 <img
                   src={heroPodcast}
                   alt="MVP Podcast - Soccer ball with headphones"
                   className="w-full max-w-lg mx-auto drop-shadow-2xl"
                 />
-                {/* Gradient fade overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-transparent pointer-events-none" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_hsl(var(--background))_100%)] pointer-events-none" />
               </motion.div>
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-75 -z-10" />
+              {/* Subtle glow effect */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-primary/30 blur-2xl rounded-full" />
             </div>
           </motion.div>
         </div>

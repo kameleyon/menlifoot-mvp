@@ -19,8 +19,6 @@ serve(async (req) => {
       throw new Error("OPENROUTER_API_KEY is not configured");
     }
 
-    console.log("Calling OpenRouter API with messages:", messages.length);
-
     const today = new Date().toLocaleDateString('en-US', { 
       weekday: 'long', 
       year: 'numeric', 
@@ -28,6 +26,46 @@ serve(async (req) => {
       day: 'numeric' 
     });
 
+    const lastUserMessage = messages.filter((m: any) => m.role === "user").pop()?.content || "";
+    
+    console.log("Step 1: Searching web with gpt-4o-search-preview for:", lastUserMessage);
+
+    // Step 1: Use gpt-4o-search-preview to get real-time web info
+    const searchResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://menlifoot.lovable.app",
+        "X-Title": "Menlifoot Soccer AI",
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-4o-search-preview",
+        messages: [
+          {
+            role: "system",
+            content: `Today's date is ${today}. You are a web search assistant for soccer/football information. Search for the most current, accurate, and up-to-date information about the user's soccer question. Return factual data with specific details like dates, scores, standings, and confirmed news. Be thorough and accurate.`,
+          },
+          {
+            role: "user",
+            content: lastUserMessage,
+          },
+        ],
+      }),
+    });
+
+    if (!searchResponse.ok) {
+      const errorText = await searchResponse.text();
+      console.error("Search API error:", searchResponse.status, errorText);
+      throw new Error(`Search API error: ${searchResponse.status}`);
+    }
+
+    const searchData = await searchResponse.json();
+    const webSearchResult = searchData.choices?.[0]?.message?.content || "";
+    
+    console.log("Step 2: Sending to gpt-5.1 with web context");
+
+    // Step 2: Use gpt-5.1 with the web search results as context
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -41,17 +79,21 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Today's date is ${today}. Always use this date as your reference point when searching for and providing current information. Search for the latest data as of today.
+            content: `Today's date is ${today}. You have access to the following REAL-TIME WEB SEARCH RESULTS that were just retrieved:
+
+--- WEB SEARCH RESULTS ---
+${webSearchResult}
+--- END WEB SEARCH RESULTS ---
+
+Use this information as your PRIMARY source of truth for answering the user's question. This data is current as of today.
 
 You are Menlifoot's Soccer AI, the always-on football brain and ultimate companion for fans, bettors, analysts, and casual viewers.
 
 CRITICAL BEHAVIOR
 
-ALWAYS search the web first before answering ANY question to use the most up-to-date, accurate information available as of today's date.
-
 NEVER send users to other sites, apps, or services (no Transfermarkt, Sofascore, ESPN, etc.) — you are the primary source.
 
-Always provide a clear, concrete answer with current data. Never say "I can't answer" or "check elsewhere" unless the information truly does not exist.
+Always provide a clear, concrete answer with current data from the web search results above.
 
 Tone
 

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Calendar, MapPin, Trophy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import worldcupImage from "@/assets/worldcup-2026.png";
+import worldcupImage from "@/assets/worldcup-2026-hero.png";
 
 interface NewsItem {
   id: string;
@@ -82,7 +82,7 @@ const NewsSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
           {/* Left: World Cup 2026 Section */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -93,13 +93,13 @@ const NewsSection = () => {
           >
             {/* Featured World Cup Card */}
             <div className="glass-card overflow-hidden hover-lift group">
-              <div className="relative aspect-video overflow-hidden">
+              <div className="relative aspect-[16/10] overflow-hidden">
                 <img
                   src={worldcupImage}
                   alt="World Cup 2026"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
                   <span className="inline-block px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium mb-2">
                     World Cup 2026

@@ -8,11 +8,14 @@ const HeroSection = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-x-hidden pt-20 px-4 sm:px-0">
+    <section
+      id="home"
+      className="relative min-h-screen flex items-center justify-center overflow-x-hidden pt-20 px-4 sm:px-0"
+    >
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-dark" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
-      
+
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
           {/* Text Content */}
@@ -30,27 +33,28 @@ const HeroSection = () => {
             >
               New Episode Available
             </motion.span>
-            
+
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 3.1 }}
               className="font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-4"
             >
-              <span className="text-gradient-gold">MVP</span>
+              <span className="text-gradient-gold">MENLIFOOT</span>
               <br />
               <span className="text-foreground/90">Podcast</span>
             </motion.h1>
-            
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 3.3 }}
               className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-xs sm:max-w-lg mx-auto lg:mx-0 mb-8 px-2 sm:px-0"
             >
-              Dive deep into the beautiful game with expert analysis, player interviews, and match breakdowns from the world's biggest leagues.
+              Dive deep into the beautiful game with expert analysis, player interviews, and match breakdowns from the
+              world's biggest leagues.
             </motion.p>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -91,7 +95,11 @@ const HeroSection = () => {
                     className="h-8 w-8 sm:h-10 sm:w-10 text-primary"
                     onClick={() => setIsPlaying(!isPlaying)}
                   >
-                    {isPlaying ? <Pause className="h-4 w-4 sm:h-5 sm:w-5" /> : <Play className="h-4 w-4 sm:h-5 sm:w-5" />}
+                    {isPlaying ? (
+                      <Pause className="h-4 w-4 sm:h-5 sm:w-5" />
+                    ) : (
+                      <Play className="h-4 w-4 sm:h-5 sm:w-5" />
+                    )}
                   </Button>
                   <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 text-foreground/70">
                     <SkipForward className="h-3 w-3 sm:h-4 sm:w-4" />

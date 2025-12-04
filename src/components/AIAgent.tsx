@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Send, Sparkles } from "lucide-react";
+import { MessageSquare, X, Send, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: number;
@@ -15,13 +16,14 @@ const AIAgent = () => {
     {
       id: 1,
       type: "bot",
-      content: "Hey there! 👋 I'm your soccer companion. Ask me anything about football - match predictions, player stats, transfer news, or World Cup 2026!",
+      content: "Yo! ⚽ I'm your Menlifoot Soccer AI. Ask me anything about football - match predictions, player stats, transfer tea, or World Cup 2026! Let's talk the beautiful game.",
     },
   ]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: messages.length + 1,
@@ -30,28 +32,51 @@ const AIAgent = () => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const userInput = input;
     setInput("");
+    setIsLoading(true);
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponses = [
-        "Great question! Based on current form and head-to-head stats, I'd say it's going to be a close match. The home team has won 60% of their recent encounters.",
-        "The World Cup 2026 is set to be historic! With 48 teams and matches across USA, Mexico, and Canada, it's going to be the biggest tournament ever.",
-        "Looking at the transfer market, there are some exciting moves expected in January. Would you like me to break down the top rumored transfers?",
-        "That's an interesting tactical question! Modern formations like the 3-5-2 offer great flexibility. The key is having wing-backs with exceptional stamina.",
-      ];
-      
-      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
-      
+    try {
+      // Build conversation history for context
+      const conversationHistory = messages
+        .filter(m => m.id > 1) // Skip initial greeting
+        .map(m => ({
+          role: m.type === "user" ? "user" : "assistant",
+          content: m.content
+        }));
+
+      const { data, error } = await supabase.functions.invoke('soccer-chat', {
+        body: {
+          messages: [
+            ...conversationHistory,
+            { role: "user", content: userInput }
+          ]
+        }
+      });
+
+      if (error) throw error;
+
       setMessages((prev) => [
         ...prev,
         {
           id: prev.length + 1,
           type: "bot",
-          content: randomResponse,
+          content: data.reply,
         },
       ]);
-    }, 1000);
+    } catch (error) {
+      console.error('Chat error:', error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          type: "bot",
+          content: "My bad, something went wrong. Try again! ⚽",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -138,15 +163,21 @@ const AIAgent = () => {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSend()}
                   placeholder="Ask about soccer..."
-                  className="flex-1 bg-surface-elevated rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  disabled={isLoading}
+                  className="flex-1 bg-surface-elevated rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
                 />
                 <Button
                   variant="gold"
                   size="icon"
                   className="h-10 w-10 rounded-full"
                   onClick={handleSend}
+                  disabled={isLoading}
                 >
-                  <Send className="h-4 w-4" />
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>

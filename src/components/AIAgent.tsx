@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, X, Send, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   id: number;
@@ -148,7 +149,13 @@ const AIAgent = () => {
                         : "bg-surface-elevated text-foreground rounded-bl-md"
                     }`}
                   >
-                    <p className="text-sm leading-relaxed">{message.content}</p>
+                    {message.type === "bot" ? (
+                      <div className="text-sm leading-relaxed prose prose-sm prose-invert max-w-none [&_p]:m-0 [&_ul]:my-1 [&_li]:my-0 [&_strong]:text-primary">
+                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="text-sm leading-relaxed">{message.content}</p>
+                    )}
                   </div>
                 </motion.div>
               ))}

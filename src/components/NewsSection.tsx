@@ -272,7 +272,7 @@ const NewsSection = () => {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <Link to="/news">
-                <Button variant="outline" className="w-full mt-4">
+                <Button variant="outline" className="w-full mt-2">
                   View All News
                 </Button>
               </Link>

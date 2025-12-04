@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Trophy, Newspaper, Users, Activity, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -31,10 +31,13 @@ const categoryIcons: Record<string, any> = {
 
 const News = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
-  const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(
+    location.state?.selectedArticle || null
+  );
 
   const categories = [
     { id: 'all', label: 'All News', icon: Newspaper },

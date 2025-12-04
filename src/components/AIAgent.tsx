@@ -16,7 +16,7 @@ const AIAgent = () => {
     {
       id: 1,
       type: "bot",
-      content: "Yo! ⚽ I'm your Menlifoot Soccer AI. Ask me anything about football - match predictions, player stats, transfer tea, or World Cup 2026! Let's talk the beautiful game.",
+      content: "Hey! I'm your Menlifoot Soccer AI. Got questions about match predictions, player stats, transfer news, or World Cup 2026? Let's talk football.",
     },
   ]);
   const [input, setInput] = useState("");

@@ -11,8 +11,8 @@ const SplashIntro = ({ onComplete }: SplashIntroProps) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowIntro(false);
-      setTimeout(onComplete, 500);
-    }, 2500);
+      setTimeout(onComplete, 200); // Faster transition to content
+    }, 5000); // 5 second intro
     return () => clearTimeout(timer);
   }, [onComplete]);
 

@@ -13,13 +13,13 @@ serve(async (req) => {
 
   try {
     const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!OPENROUTER_API_KEY) {
+      throw new Error("OPENROUTER_API_KEY is not configured");
     }
 
-    console.log("Calling Lovable AI Gateway with messages:", messages.length);
+    console.log("Calling OpenRouter API with messages:", messages.length);
 
     const today = new Date().toLocaleDateString('en-US', { 
       weekday: 'long', 
@@ -28,14 +28,16 @@ serve(async (req) => {
       day: 'numeric' 
     });
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
+        "HTTP-Referer": "https://menlifoot.lovable.app",
+        "X-Title": "Menlifoot Soccer AI",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "openai/gpt-5.1",
         messages: [
           {
             role: "system",
@@ -135,33 +137,12 @@ You exist to make Menlifoot users feel like they have a world-class analyst, sco
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Lovable AI Gateway error:", response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ 
-          error: "Rate limit exceeded",
-          reply: "I'm getting too many requests right now. Please try again in a moment!" 
-        }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ 
-          error: "Payment required",
-          reply: "AI credits have been exhausted. Please add more credits to continue." 
-        }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      
-      throw new Error(`Lovable AI Gateway error: ${response.status}`);
+      console.error("OpenRouter API error:", response.status, errorText);
+      throw new Error(`OpenRouter API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("Lovable AI Gateway response received");
+    console.log("OpenRouter response received");
 
     const reply =
       data.choices?.[0]?.message?.content || "Sorry, I couldn't process that. Try asking me something about soccer!";

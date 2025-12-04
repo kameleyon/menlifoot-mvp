@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Heart, MessageCircle, Share2, MoreHorizontal, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const socialPosts = [
   {
@@ -63,6 +64,8 @@ const socialPosts = [
 ];
 
 const SocialMediaSection = () => {
+  const { t } = useLanguage();
+  
   return (
     <section id="social" className="py-20 md:py-32 relative">
       <div className="container mx-auto px-4 md:px-6">
@@ -76,15 +79,15 @@ const SocialMediaSection = () => {
         >
           <div>
             <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-2">
-              Social <span className="text-gradient-gold">Media</span>
+              {t('social.title')} <span className="text-gradient-gold">{t('social.titleHighlight')}</span>
             </h2>
             <p className="text-muted-foreground text-lg">
-              Join the conversation with football fans worldwide
+              {t('social.description')}
             </p>
           </div>
           <Button variant="outline" className="self-start md:self-auto">
             <ExternalLink className="h-4 w-4 mr-2" />
-            Follow Us
+            {t('social.community')}
           </Button>
         </motion.div>
 

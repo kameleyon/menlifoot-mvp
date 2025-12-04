@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Calendar, MapPin, Trophy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 import worldcupImage from "@/assets/worldcup-2026-hero.png";
 
 interface NewsItem {
@@ -21,6 +22,7 @@ const NewsSection = () => {
   const [otherNews, setOtherNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleArticleClick = (item: NewsItem) => {
     navigate('/news', { state: { selectedArticle: item } });
@@ -78,13 +80,13 @@ const NewsSection = () => {
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs uppercase tracking-wider mb-4">
             <Trophy className="h-3 w-3" />
-            Live Updates
+            {t('news.liveUpdates')}
           </span>
           <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
-            Latest <span className="text-gradient-gold">News</span>
+            {t('news.title')} <span className="text-gradient-gold">{t('news.titleHighlight')}</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Stay updated with the latest soccer news from around the world
+            {t('news.description')}
           </p>
         </motion.div>
 
@@ -108,16 +110,16 @@ const NewsSection = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
                   <span className="inline-block px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium mb-2">
-                    World Cup 2026
+                    {t('news.worldCup')}
                   </span>
                   <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-                    The Road to 2026
+                    {t('news.roadTo2026')}
                   </h3>
                 </div>
               </div>
               <div className="p-6">
                 <p className="text-muted-foreground mb-4">
-                  Everything you need to know about the upcoming FIFA World Cup hosted across USA, Mexico, and Canada.
+                  {t('news.wcDescription')}
                 </p>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
                   <span className="flex items-center gap-1.5">
@@ -131,7 +133,7 @@ const NewsSection = () => {
                 </div>
                 <Link to="/news?category=worldcup">
                   <Button variant="gold" className="w-full">
-                    Explore Coverage
+                    {t('news.exploreCoverage')}
                   </Button>
                 </Link>
               </div>
@@ -145,7 +147,7 @@ const NewsSection = () => {
             ) : worldCupNews.length > 0 ? (
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider px-1">
-                  Latest Qualifier Results
+                  {t('news.latestQualifier')}
                 </h4>
                 {worldCupNews.map((item, index) => (
                   <motion.article
@@ -175,7 +177,7 @@ const NewsSection = () => {
           {/* Right: Other News by Category */}
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider px-1">
-              Latest Updates
+              {t('news.latestUpdates')}
             </h4>
             
             {loading ? (
@@ -281,7 +283,7 @@ const NewsSection = () => {
             >
               <Link to="/news">
                 <Button variant="outline" className="w-full mt-2">
-                  View All News
+                  {t('news.viewAll')}
                 </Button>
               </Link>
             </motion.div>

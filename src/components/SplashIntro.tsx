@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SplashIntroProps {
   onComplete: () => void;
@@ -7,12 +8,13 @@ interface SplashIntroProps {
 
 const SplashIntro = ({ onComplete }: SplashIntroProps) => {
   const [showIntro, setShowIntro] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowIntro(false);
-      setTimeout(onComplete, 200); // Faster transition to content
-    }, 5000); // 5 second intro
+      setTimeout(onComplete, 200);
+    }, 5000);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -49,7 +51,7 @@ const SplashIntro = ({ onComplete }: SplashIntroProps) => {
             >
               <div className="h-px w-6 md:w-12 bg-gradient-to-r from-transparent to-primary" />
               <span className="text-xs md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] text-muted-foreground whitespace-nowrap">
-                Your Soccer Companion
+                {t('splash.companion')}
               </span>
               <div className="h-px w-6 md:w-12 bg-gradient-to-l from-transparent to-primary" />
             </motion.div>

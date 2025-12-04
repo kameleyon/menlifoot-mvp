@@ -63,20 +63,31 @@ serve(async (req) => {
     if (newsData.articles) {
       console.log(`Found ${newsData.articles.length} articles before filtering`);
       
-      // Football-related keywords for strict filtering
-      const footballKeywords = [
-        'football', 'soccer', 'premier league', 'la liga', 'bundesliga', 'serie a', 'ligue 1',
+      // Exclusion keywords for American football and other sports
+      const excludeKeywords = [
+        'nfl', 'nba', 'mlb', 'nhl', 'fantasy football', 'touchdown', 'quarterback', 'wide receiver',
+        'tight end', 'running back', 'super bowl', 'superbowl', 'patriots', 'cowboys', 'eagles',
+        'chiefs', 'ravens', 'bills', 'dolphins', 'jets', 'steelers', 'browns', 'bengals', 'colts',
+        'texans', 'jaguars', 'titans', 'broncos', 'raiders', 'chargers', 'packers', 'bears', 'lions',
+        'vikings', 'falcons', 'panthers', 'saints', 'buccaneers', 'cardinals', 'rams', 'seahawks',
+        '49ers', 'commanders', 'giants', 'baseball', 'basketball', 'hockey', 'tennis', 'golf',
+        'cricket', 'rugby league', 'afl', 'endzone', 'field goal', 'interception', 'sack',
+        'yards', 'fumble', 'draft pick', 'rookie card', 'fantasy league', 'waiver wire'
+      ];
+      
+      // Soccer/European football keywords for strict filtering
+      const soccerKeywords = [
+        'soccer', 'premier league', 'la liga', 'bundesliga', 'serie a', 'ligue 1',
         'champions league', 'europa league', 'world cup', 'euro 2024', 'euro 2028',
-        'transfer', 'goal', 'striker', 'midfielder', 'defender', 'goalkeeper',
-        'manager', 'coach', 'match', 'fixture', 'stadium', 'penalty', 'red card', 'yellow card',
-        'offside', 'var', 'referee', 'kick-off', 'halftime', 'fulltime',
+        'striker', 'midfielder', 'defender', 'goalkeeper', 'winger',
+        'penalty kick', 'red card', 'yellow card', 'offside', 'var',
         'messi', 'ronaldo', 'mbappe', 'haaland', 'bellingham', 'vinicius', 'salah', 'de bruyne',
         'manchester united', 'manchester city', 'liverpool', 'arsenal', 'chelsea', 'tottenham',
         'real madrid', 'barcelona', 'atletico madrid', 'bayern munich', 'borussia dortmund',
         'psg', 'juventus', 'inter milan', 'ac milan', 'napoli',
         'fifa', 'uefa', 'fa cup', 'carabao cup', 'copa del rey', 'dfb pokal',
-        'qualification', 'qualifier', 'group stage', 'knockout', 'semi-final', 'final',
-        'clean sheet', 'hat-trick', 'assist', 'tackle', 'dribble', 'header'
+        'clean sheet', 'hat-trick', 'epl', 'laliga', 'calcio', 'fußball', 'fussball',
+        'fc ', ' fc', 'united', 'city', 'athletic', 'sporting'
       ];
       
       newsData.articles.forEach((article: any, index: number) => {
@@ -84,10 +95,17 @@ serve(async (req) => {
         const descLower = (article.description || '').toLowerCase();
         const content = titleLower + ' ' + descLower;
         
-        // Skip articles that don't contain football-related keywords
-        const isFootballRelated = footballKeywords.some(keyword => content.includes(keyword));
-        if (!isFootballRelated) {
-          console.log(`Filtered out non-football article: ${article.title?.substring(0, 50)}`);
+        // First check for exclusion keywords (American football, other sports)
+        const hasExcludedContent = excludeKeywords.some(keyword => content.includes(keyword));
+        if (hasExcludedContent) {
+          console.log(`Filtered out (excluded sport): ${article.title?.substring(0, 50)}`);
+          return;
+        }
+        
+        // Then check for soccer-specific keywords
+        const isSoccerRelated = soccerKeywords.some(keyword => content.includes(keyword));
+        if (!isSoccerRelated) {
+          console.log(`Filtered out (not soccer): ${article.title?.substring(0, 50)}`);
           return;
         }
         

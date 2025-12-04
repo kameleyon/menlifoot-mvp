@@ -12,10 +12,13 @@ interface NewsItem {
   category: string;
   title: string;
   excerpt: string;
+  content?: string;
   date: string;
   image?: string;
   type: string;
-  details?: any;
+  source?: string;
+  url?: string;
+  author?: string;
 }
 
 const categoryIcons: Record<string, any> = {
@@ -134,55 +137,44 @@ const News = () => {
               )}
 
               <div className="prose prose-invert max-w-none">
-                <p className="text-lg text-muted-foreground leading-relaxed">
+                <p className="text-lg text-muted-foreground leading-relaxed mb-6">
                   {selectedArticle.excerpt}
                 </p>
 
-                {selectedArticle.details && (
-                  <div className="mt-8 p-6 rounded-xl bg-surface/50 border border-border/50">
-                    <h3 className="font-display text-xl font-semibold text-foreground mb-4">
-                      Match Details
-                    </h3>
-                    {selectedArticle.details.teams && (
-                      <div className="flex items-center justify-center gap-8 py-4">
-                        <div className="text-center">
-                          {selectedArticle.details.teams.home.logo && (
-                            <img
-                              src={selectedArticle.details.teams.home.logo}
-                              alt={selectedArticle.details.teams.home.name}
-                              className="w-16 h-16 mx-auto mb-2"
-                            />
-                          )}
-                          <span className="font-medium text-foreground">
-                            {selectedArticle.details.teams.home.name}
-                          </span>
-                        </div>
-                        {selectedArticle.details.goals && (
-                          <div className="text-3xl font-bold text-primary">
-                            {selectedArticle.details.goals.home ?? '-'} - {selectedArticle.details.goals.away ?? '-'}
-                          </div>
-                        )}
-                        <div className="text-center">
-                          {selectedArticle.details.teams.away.logo && (
-                            <img
-                              src={selectedArticle.details.teams.away.logo}
-                              alt={selectedArticle.details.teams.away.name}
-                              className="w-16 h-16 mx-auto mb-2"
-                            />
-                          )}
-                          <span className="font-medium text-foreground">
-                            {selectedArticle.details.teams.away.name}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    {selectedArticle.details.venue && (
-                      <p className="text-center text-muted-foreground mt-4">
-                        📍 {selectedArticle.details.venue.name}, {selectedArticle.details.venue.city}
-                      </p>
+                {selectedArticle.content && selectedArticle.content !== selectedArticle.excerpt && (
+                  <p className="text-muted-foreground leading-relaxed">
+                    {selectedArticle.content}
+                  </p>
+                )}
+
+                {/* Source Info */}
+                <div className="mt-8 p-6 rounded-xl bg-surface/50 border border-border/50">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                      {selectedArticle.source && (
+                        <p className="text-sm text-muted-foreground">
+                          Source: <span className="text-foreground font-medium">{selectedArticle.source}</span>
+                        </p>
+                      )}
+                      {selectedArticle.author && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          By: <span className="text-foreground">{selectedArticle.author}</span>
+                        </p>
+                      )}
+                    </div>
+                    {selectedArticle.url && (
+                      <a
+                        href={selectedArticle.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                      >
+                        Read Full Article
+                        <ArrowLeft className="h-4 w-4 rotate-180" />
+                      </a>
                     )}
                   </div>
-                )}
+                </div>
               </div>
             </motion.article>
           </div>

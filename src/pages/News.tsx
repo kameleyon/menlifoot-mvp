@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Trophy, Newspaper, Users, Activity, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -30,9 +30,10 @@ const categoryIcons: Record<string, any> = {
 };
 
 const News = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
 
   const categories = [
@@ -219,7 +220,10 @@ const News = () => {
                 key={cat.id}
                 variant={activeCategory === cat.id ? 'gold' : 'outline'}
                 size="sm"
-                onClick={() => setActiveCategory(cat.id)}
+                onClick={() => {
+                  setActiveCategory(cat.id);
+                  setSearchParams(cat.id === 'all' ? {} : { category: cat.id });
+                }}
                 className="gap-2"
               >
                 <cat.icon className="h-4 w-4" />

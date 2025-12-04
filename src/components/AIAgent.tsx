@@ -57,31 +57,40 @@ const AIAgent = () => {
 
   return (
     <>
-      {/* Chat Toggle Button */}
+      {/* Chat Toggle Button - Soccer Ball */}
       <motion.div
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, delay: 4 }}
         className="fixed bottom-6 right-6 z-50"
       >
-        <Button
-          variant="gold"
-          size="icon"
-          className="h-14 w-14 rounded-full shadow-lg animate-pulse-gold"
+        <button
+          className="relative h-14 w-14 rounded-full shadow-lg hover:scale-110 transition-transform duration-300"
           onClick={() => setIsOpen(true)}
+          aria-label="Open AI Chat"
         >
-          <MessageCircle className="h-6 w-6" />
-        </Button>
+          {/* Soccer ball design */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gold to-gold-dark overflow-hidden">
+            {/* Pentagon patterns */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-6 h-6 bg-background rounded-sm rotate-45" />
+            </div>
+            <div className="absolute top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-background rounded-sm" />
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-background rounded-sm" />
+            <div className="absolute left-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-background rounded-sm" />
+            <div className="absolute right-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-background rounded-sm" />
+          </div>
+          {/* Chat icon overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <MessageCircle className="h-5 w-5 text-background" />
+          </div>
+        </button>
       </motion.div>
 
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
+          <div
             className="fixed bottom-6 right-6 z-50 w-[360px] max-w-[calc(100vw-48px)] glass-card overflow-hidden shadow-2xl"
           >
             {/* Header */}
@@ -158,7 +167,7 @@ const AIAgent = () => {
                 </Button>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>

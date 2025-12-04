@@ -8,7 +8,7 @@ const HeroSection = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-x-hidden pt-20 px-4 sm:px-0">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-dark" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
@@ -55,13 +55,13 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 3.5 }}
-              className="flex flex-wrap items-center justify-center lg:justify-start gap-4"
+              className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4"
             >
-              <Button variant="gold" size="lg" className="gap-2">
-                <Play className="h-5 w-5" />
+              <Button variant="gold" size="default" className="gap-2 text-sm sm:text-base">
+                <Play className="h-4 w-4 sm:h-5 sm:w-5" />
                 Listen Now
               </Button>
-              <Button variant="outline" size="lg">
+              <Button variant="outline" size="default" className="text-sm sm:text-base">
                 Browse Episodes
               </Button>
             </motion.div>

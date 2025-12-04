@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Globe, ShoppingCart } from "lucide-react";
+import { Menu, X, Languages, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
@@ -76,7 +76,7 @@ const Navbar = () => {
               size="icon"
               className="hidden md:flex text-foreground/70 hover:text-primary hover:bg-primary/10"
             >
-              <Globe className="h-5 w-5" />
+              <Languages className="h-5 w-5" />
             </Button>
             <Button
               variant="ghost"

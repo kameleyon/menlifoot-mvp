@@ -47,11 +47,11 @@ const SplashIntro = ({ onComplete }: SplashIntroProps) => {
               transition={{ duration: 0.6, delay: 1.2 }}
               className="flex items-center justify-center gap-2"
             >
-              <div className="h-px w-12 bg-gradient-to-r from-transparent to-primary" />
-              <span className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+              <div className="h-px w-6 md:w-12 bg-gradient-to-r from-transparent to-primary" />
+              <span className="text-xs md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] text-muted-foreground whitespace-nowrap">
                 Your Soccer Companion
               </span>
-              <div className="h-px w-12 bg-gradient-to-l from-transparent to-primary" />
+              <div className="h-px w-6 md:w-12 bg-gradient-to-l from-transparent to-primary" />
             </motion.div>
           </div>
         </motion.div>

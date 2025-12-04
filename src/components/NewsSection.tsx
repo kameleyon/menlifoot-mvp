@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Calendar, MapPin, Trophy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import worldcupImage from "@/assets/worldcup-2026-hero.png";
 
 interface NewsItem {
@@ -20,6 +20,11 @@ const NewsSection = () => {
   const [worldCupNews, setWorldCupNews] = useState<NewsItem[]>([]);
   const [otherNews, setOtherNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const handleArticleClick = (item: NewsItem) => {
+    navigate('/news', { state: { selectedArticle: item } });
+  };
 
   useEffect(() => {
     fetchNews();
@@ -150,7 +155,7 @@ const NewsSection = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: 0.1 * index }}
                     className="glass-card p-4 hover-lift cursor-pointer group"
-                    onClick={() => item.url && window.open(item.url, '_blank')}
+                    onClick={() => handleArticleClick(item)}
                   >
                     <span className="text-xs text-primary font-medium uppercase tracking-wider">
                       {item.category}
@@ -186,7 +191,7 @@ const NewsSection = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 * index }}
                   className="glass-card p-5 hover-lift group cursor-pointer"
-                  onClick={() => item.url && window.open(item.url, '_blank')}
+                  onClick={() => handleArticleClick(item)}
                 >
                   <div className="flex items-start gap-4">
                     {item.image && (

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Search, ShoppingCart } from "lucide-react";
+import { Menu, X, Globe, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,7 +19,7 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "#home" },
+    { name: "Home", href: "/" },
     { name: "Podcast", href: "#podcast" },
     { name: "News", href: "#news" },
     { name: "Social", href: "#social" },
@@ -39,33 +40,43 @@ const Navbar = () => {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <a href="#home" className="flex items-center">
+          <Link to="/" className="flex items-center">
             <span className="font-display text-2xl md:text-3xl font-bold text-gradient-gold">
               Menlifoot
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors duration-200"
-              >
-                {link.name}
-              </a>
+              link.href.startsWith('/') ? (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors duration-200"
+                >
+                  {link.name}
+                </Link>
+              ) : (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors duration-200"
+                >
+                  {link.name}
+                </a>
+              )
             ))}
           </div>
 
-          {/* Search & Actions */}
+          {/* Language & Actions */}
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               className="hidden md:flex text-foreground/70 hover:text-primary hover:bg-primary/10"
             >
-              <Search className="h-5 w-5" />
+              <Globe className="h-5 w-5" />
             </Button>
             <Button
               variant="ghost"
@@ -112,14 +123,25 @@ const Navbar = () => {
           >
             <div className="container mx-auto px-4 py-4 space-y-2">
               {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block py-3 text-foreground/80 hover:text-primary transition-colors"
-                >
-                  {link.name}
-                </a>
+                link.href.startsWith('/') ? (
+                  <Link
+                    key={link.name}
+                    to={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block py-3 text-foreground/80 hover:text-primary transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block py-3 text-foreground/80 hover:text-primary transition-colors"
+                  >
+                    {link.name}
+                  </a>
+                )
               ))}
               <Button variant="nav" className="w-full mt-4">
                 Sign In

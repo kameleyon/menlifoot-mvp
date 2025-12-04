@@ -46,7 +46,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 3.3 }}
-              className="text-muted-foreground text-lg md:text-xl max-w-lg mx-auto lg:mx-0 mb-8"
+              className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-xs sm:max-w-lg mx-auto lg:mx-0 mb-8 px-2 sm:px-0"
             >
               Dive deep into the beautiful game with expert analysis, player interviews, and match breakdowns from the world's biggest leagues.
             </motion.p>
@@ -71,34 +71,34 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 3.7 }}
-              className="mt-10 glass-card p-4 max-w-md mx-auto lg:mx-0"
+              className="mt-10 glass-card p-3 sm:p-4 max-w-[280px] sm:max-w-md mx-auto lg:mx-0"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
-                  <span className="text-primary-foreground font-bold">EP</span>
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
+                  <span className="text-primary-foreground font-bold text-xs sm:text-base">EP</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">World Cup 2026 Preview</p>
-                  <p className="text-xs text-muted-foreground">Episode 47 • 45 min</p>
+                  <p className="text-xs sm:text-sm font-medium text-foreground truncate">World Cup 2026 Preview</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Episode 47 • 45 min</p>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-foreground/70">
-                    <SkipBack className="h-4 w-4" />
+                <div className="flex items-center gap-0 sm:gap-1">
+                  <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 text-foreground/70">
+                    <SkipBack className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 text-primary"
+                    className="h-8 w-8 sm:h-10 sm:w-10 text-primary"
                     onClick={() => setIsPlaying(!isPlaying)}
                   >
-                    {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                    {isPlaying ? <Pause className="h-4 w-4 sm:h-5 sm:w-5" /> : <Play className="h-4 w-4 sm:h-5 sm:w-5" />}
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-foreground/70">
-                    <SkipForward className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 text-foreground/70">
+                    <SkipForward className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>
-              <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
+              <div className="mt-2 sm:mt-3 h-1 bg-muted rounded-full overflow-hidden">
                 <div className="h-full w-1/3 bg-gradient-gold rounded-full" />
               </div>
             </motion.div>
@@ -115,12 +115,17 @@ const HeroSection = () => {
               <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="relative"
               >
                 <img
                   src={heroPodcast}
                   alt="MVP Podcast - Soccer ball with headphones"
                   className="w-full max-w-lg mx-auto drop-shadow-2xl"
                 />
+                {/* Gradient fade overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_hsl(var(--background))_100%)] pointer-events-none" />
               </motion.div>
               {/* Glow effect */}
               <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-75 -z-10" />

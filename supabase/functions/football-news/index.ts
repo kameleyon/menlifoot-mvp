@@ -130,12 +130,16 @@ serve(async (req) => {
           articleCategory = 'Injury Report';
         }
 
+        // Clean up truncated content from NewsAPI (removes "[+XXXX chars]" suffix)
+        let cleanContent = (article.content || article.description || '').replace(/\s*\[\+\d+ chars\]$/, '');
+        let excerpt = article.description || cleanContent.substring(0, 300) || '';
+        
         newsItems.push({
           id: `news-${index}-${Date.now()}`,
           category: articleCategory,
           title: article.title || 'Untitled',
-          excerpt: article.description || article.content?.substring(0, 200) || '',
-          content: article.content || article.description || '',
+          excerpt: excerpt,
+          content: cleanContent,
           date: article.publishedAt?.split('T')[0] || new Date().toISOString().split('T')[0],
           image: article.urlToImage,
           type: category === 'worldcup' ? 'worldcup' : 

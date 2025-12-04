@@ -48,7 +48,7 @@ const NewsSection = () => {
         );
         
         setWorldCupNews(wcNews.slice(0, 3));
-        setOtherNews(other.slice(0, 3));
+        setOtherNews(other.slice(0, 4));
       }
     } catch (error) {
       console.error('Error fetching news:', error);

@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Sparkles } from "lucide-react";
+import { MessageSquare, X, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import aiAvatar from "@/assets/ai-avatar.png";
 
 interface Message {
   id: number;
@@ -57,7 +56,7 @@ const AIAgent = () => {
 
   return (
     <>
-      {/* Chat Toggle Button - Soccer Ball */}
+      {/* Chat Toggle Button */}
       <motion.div
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -65,25 +64,11 @@ const AIAgent = () => {
         className="fixed bottom-6 right-6 z-50"
       >
         <button
-          className="relative h-14 w-14 rounded-full shadow-lg hover:scale-110 transition-transform duration-300"
+          className="h-14 w-14 rounded-full bg-gradient-to-br from-gold to-gold-dark shadow-lg hover:scale-110 transition-transform duration-300 flex items-center justify-center"
           onClick={() => setIsOpen(true)}
           aria-label="Open AI Chat"
         >
-          {/* Soccer ball design */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gold to-gold-dark overflow-hidden">
-            {/* Pentagon patterns */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-6 h-6 bg-background rounded-sm rotate-45" />
-            </div>
-            <div className="absolute top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-background rounded-sm" />
-            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-background rounded-sm" />
-            <div className="absolute left-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-background rounded-sm" />
-            <div className="absolute right-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-background rounded-sm" />
-          </div>
-          {/* Chat icon overlay */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <MessageCircle className="h-5 w-5 text-background" />
-          </div>
+          <MessageSquare className="h-6 w-6 text-background" />
         </button>
       </motion.div>
 
@@ -98,11 +83,9 @@ const AIAgent = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <img
-                      src={aiAvatar}
-                      alt="AI Assistant"
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center">
+                      <div className="w-5 h-5 rounded-full bg-background" />
+                    </div>
                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
                   </div>
                   <div>

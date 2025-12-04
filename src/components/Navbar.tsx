@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X, Search, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/contexts/CartContext";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { totalItems } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,6 +66,18 @@ const Navbar = () => {
               className="hidden md:flex text-foreground/70 hover:text-primary hover:bg-primary/10"
             >
               <Search className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative text-foreground/70 hover:text-primary hover:bg-primary/10"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
             </Button>
             <Button
               variant="nav"

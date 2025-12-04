@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import merchJersey from "@/assets/merch-jersey.png";
 import merchScarf from "@/assets/merch-scarf.png";
@@ -41,6 +42,7 @@ const products = [
 
 const MerchSection = () => {
   const { addToCart } = useCart();
+  const { t } = useLanguage();
 
   const handleAddToCart = (product: typeof products[0]) => {
     addToCart({
@@ -49,7 +51,7 @@ const MerchSection = () => {
       price: product.price,
       image: product.image,
     });
-    toast.success(`${product.name} added to cart!`);
+    toast.success(t('merch.added'));
   };
 
   return (
@@ -67,13 +69,13 @@ const MerchSection = () => {
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs uppercase tracking-wider mb-4">
             <ShoppingBag className="h-3 w-3" />
-            Official Store
+            {t('merch.exclusive')}
           </span>
           <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
-            <span className="text-gradient-gold">Merch</span>
+            <span className="text-gradient-gold">{t('merch.title')}</span> {t('merch.titleHighlight')}
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Premium merchandise for the true football enthusiast
+            {t('merch.description')}
           </p>
         </motion.div>
 
@@ -100,7 +102,7 @@ const MerchSection = () => {
                   <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <Button variant="gold" size="sm" onClick={() => handleAddToCart(product)}>
                       <ShoppingBag className="h-4 w-4 mr-2" />
-                      Add to Cart
+                      {t('merch.addToCart')}
                     </Button>
                   </div>
                 </div>
@@ -131,7 +133,7 @@ const MerchSection = () => {
           className="text-center mt-12"
         >
           <Button variant="outline" size="lg" className="group">
-            Browse Full Collection
+            {t('merch.shopNow')}
             <ArrowRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-1" />
           </Button>
         </motion.div>

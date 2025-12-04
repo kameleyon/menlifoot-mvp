@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, Trophy, Newspaper, Users, Activity, Star } from "l
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams, useLocation } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -32,6 +33,7 @@ const categoryIcons: Record<string, any> = {
 const News = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
+  const { t } = useLanguage();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
@@ -40,12 +42,12 @@ const News = () => {
   );
 
   const categories = [
-    { id: 'all', label: 'All News', icon: Newspaper },
-    { id: 'worldcup', label: 'World Cup 2026', icon: Trophy },
-    { id: 'transfers', label: 'Transfers', icon: Users },
-    { id: 'champions', label: 'Champions League', icon: Star },
-    { id: 'matches', label: 'Matches', icon: Calendar },
-    { id: 'injuries', label: 'Injuries', icon: Activity },
+    { id: 'all', label: t('news.allNews'), icon: Newspaper },
+    { id: 'worldcup', label: t('news.worldCup'), icon: Trophy },
+    { id: 'transfers', label: t('news.transfers'), icon: Users },
+    { id: 'champions', label: t('news.championsLeague'), icon: Star },
+    { id: 'matches', label: t('news.matches'), icon: Calendar },
+    { id: 'injuries', label: t('news.injuries'), icon: Activity },
   ];
 
   useEffect(() => {
@@ -102,7 +104,7 @@ const News = () => {
               className="mb-6 gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to News
+              {t('news.backToNews')}
             </Button>
 
             <motion.article
@@ -157,12 +159,12 @@ const News = () => {
                     <div>
                       {selectedArticle.source && (
                         <p className="text-sm text-muted-foreground">
-                          Source: <span className="text-foreground font-medium">{selectedArticle.source}</span>
+                          {t('news.source')}: <span className="text-foreground font-medium">{selectedArticle.source}</span>
                         </p>
                       )}
                       {selectedArticle.author && (
                         <p className="text-sm text-muted-foreground mt-1">
-                          By: <span className="text-foreground">{selectedArticle.author}</span>
+                          {t('news.by')}: <span className="text-foreground">{selectedArticle.author}</span>
                         </p>
                       )}
                     </div>
@@ -173,7 +175,7 @@ const News = () => {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                       >
-                        Read Full Article
+                        {t('news.readFull')}
                         <ArrowLeft className="h-4 w-4 rotate-180" />
                       </a>
                     )}
@@ -201,10 +203,10 @@ const News = () => {
           >
             <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-4">
               <ArrowLeft className="h-4 w-4" />
-              Back to Home
+              {t('news.backToHome')}
             </Link>
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
-              Football <span className="text-gradient-gold">News</span>
+              {t('news.footballNews')} <span className="text-gradient-gold">{t('news.newsTitle')}</span>
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Your source for the latest football news, transfers, and match updates

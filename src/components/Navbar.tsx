@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Languages, ShoppingCart } from "lucide-react";
+import { Menu, X, Languages, ShoppingCart, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
+import { useLanguage, languageNames, Language } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const { totalItems } = useCart();
+  const { language, setLanguage, t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,12 +21,28 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close language menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setIsLangMenuOpen(false);
+    if (isLangMenuOpen) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [isLangMenuOpen]);
+
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Podcast", href: "#podcast" },
-    { name: "News", href: "#news" },
-    { name: "Social", href: "#social" },
-    { name: "Store", href: "#store" },
+    { name: t('nav.home'), href: "/" },
+    { name: t('nav.podcast'), href: "#podcast" },
+    { name: t('nav.news'), href: "#news" },
+    { name: t('nav.social'), href: "#social" },
+    { name: t('nav.store'), href: "#store" },
+  ];
+
+  const languages: { code: Language; name: string }[] = [
+    { code: 'en', name: 'English' },
+    { code: 'fr', name: 'Français' },
+    { code: 'es', name: 'Español' },
+    { code: 'ht', name: 'Kreyòl' },
   ];
 
   return (
@@ -71,13 +90,53 @@ const Navbar = () => {
 
           {/* Language & Actions */}
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden md:flex text-foreground/70 hover:text-primary hover:bg-primary/10"
-            >
-              <Languages className="h-5 w-5" />
-            </Button>
+            {/* Language Selector */}
+            <div className="relative hidden md:block">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-foreground/70 hover:text-primary hover:bg-primary/10 gap-1.5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsLangMenuOpen(!isLangMenuOpen);
+                }}
+              >
+                <Languages className="h-4 w-4" />
+                <span className="text-xs uppercase">{language}</span>
+                <ChevronDown className={`h-3 w-3 transition-transform ${isLangMenuOpen ? 'rotate-180' : ''}`} />
+              </Button>
+              
+              <AnimatePresence>
+                {isLangMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full right-0 mt-2 w-36 glass-card py-2 shadow-xl"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => {
+                          setLanguage(lang.code);
+                          setIsLangMenuOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-left text-sm transition-colors ${
+                          language === lang.code
+                            ? 'text-primary bg-primary/10'
+                            : 'text-foreground/70 hover:text-primary hover:bg-primary/5'
+                        }`}
+                      >
+                        {lang.name}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <Button
               variant="ghost"
               size="icon"
@@ -95,7 +154,7 @@ const Navbar = () => {
               size="sm"
               className="hidden md:flex"
             >
-              Sign In
+              {t('nav.signIn')}
             </Button>
 
             {/* Mobile Menu Toggle */}
@@ -143,8 +202,32 @@ const Navbar = () => {
                   </a>
                 )
               ))}
+              
+              {/* Mobile Language Selector */}
+              <div className="py-3 border-t border-border/50">
+                <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Language</p>
+                <div className="flex flex-wrap gap-2">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        setLanguage(lang.code);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                        language === lang.code
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-surface-elevated text-foreground/70 hover:text-primary'
+                      }`}
+                    >
+                      {lang.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
               <Button variant="nav" className="w-full mt-4">
-                Sign In
+                {t('nav.signIn')}
               </Button>
             </div>
           </motion.div>

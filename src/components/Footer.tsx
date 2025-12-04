@@ -1,12 +1,30 @@
 import { motion } from "framer-motion";
 import { Twitter, Instagram, Youtube, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
+  const { t } = useLanguage();
+
   const footerLinks = {
-    Company: ["About Us", "Careers", "Press", "Contact"],
-    Content: ["Podcast", "News", "Videos", "Newsletter"],
-    Support: ["Help Center", "Privacy Policy", "Terms of Service", "Cookie Policy"],
+    [t('footer.company')]: [
+      { key: 'aboutUs', label: t('footer.aboutUs') },
+      { key: 'careers', label: t('footer.careers') },
+      { key: 'press', label: t('footer.press') },
+      { key: 'contact', label: t('footer.contact') },
+    ],
+    [t('footer.content')]: [
+      { key: 'podcast', label: t('footer.podcast') },
+      { key: 'news', label: t('footer.news') },
+      { key: 'videos', label: t('footer.videos') },
+      { key: 'newsletter', label: t('footer.newsletter') },
+    ],
+    [t('footer.support')]: [
+      { key: 'helpCenter', label: t('footer.helpCenter') },
+      { key: 'privacyPolicy', label: t('footer.privacyPolicy') },
+      { key: 'termsOfService', label: t('footer.termsOfService') },
+      { key: 'cookiePolicy', label: t('footer.cookiePolicy') },
+    ],
   };
 
   const socialLinks = [
@@ -35,14 +53,14 @@ const Footer = () => {
               </span>
             </motion.a>
             <p className="text-muted-foreground mt-4 mb-6 max-w-sm">
-              Your ultimate soccer companion. Stay connected with the beautiful game through podcasts, news, and community.
+              {t('footer.tagline')}
             </p>
             
             {/* Newsletter */}
             <div className="flex gap-2">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t('footer.emailPlaceholder')}
                 className="flex-1 bg-surface-elevated rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
               <Button variant="gold" size="icon">
@@ -57,12 +75,12 @@ const Footer = () => {
               <h4 className="font-medium text-foreground mb-4">{title}</h4>
               <ul className="space-y-3">
                 {links.map((link) => (
-                  <li key={link}>
+                  <li key={link.key}>
                     <a
                       href="#"
                       className="text-muted-foreground hover:text-primary transition-colors text-sm"
                     >
-                      {link}
+                      {link.label}
                     </a>
                   </li>
                 ))}
@@ -74,7 +92,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border/30">
           <p className="text-sm text-muted-foreground">
-            © 2024 Menlifoot. All rights reserved.
+            © 2024 Menlifoot. {t('footer.rights')}
           </p>
           <div className="flex items-center gap-4">
             {socialLinks.map((social) => (

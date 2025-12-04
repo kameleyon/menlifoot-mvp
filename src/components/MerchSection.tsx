@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
 import merchJersey from "@/assets/merch-jersey.png";
 import merchScarf from "@/assets/merch-scarf.png";
 import merchCap from "@/assets/merch-cap.png";
@@ -38,6 +40,18 @@ const products = [
 ];
 
 const MerchSection = () => {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = (product: typeof products[0]) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+    });
+    toast.success(`${product.name} added to cart!`);
+  };
+
   return (
     <section id="store" className="py-20 md:py-32 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
@@ -84,7 +98,7 @@ const MerchSection = () => {
                   />
                   {/* Quick Add */}
                   <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <Button variant="gold" size="sm">
+                    <Button variant="gold" size="sm" onClick={() => handleAddToCart(product)}>
                       <ShoppingBag className="h-4 w-4 mr-2" />
                       Add to Cart
                     </Button>

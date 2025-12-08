@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, X, Send, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ interface Message {
 }
 
 const AIAgent = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -25,6 +25,15 @@ const AIAgent = () => {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update initial greeting message when language changes
+  useEffect(() => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === 1 && msg.type === "bot" 
+        ? { ...msg, content: t('ai.greeting') }
+        : msg
+    ));
+  }, [language, t]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;

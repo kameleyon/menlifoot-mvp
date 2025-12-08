@@ -107,6 +107,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Splash
     'splash.companion': 'Your Soccer Companion',
+    
+    // Common
+    'common.back': 'Back',
   },
   fr: {
     // Navbar
@@ -206,6 +209,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Splash
     'splash.companion': 'Votre Compagnon Football',
+    
+    // Common
+    'common.back': 'Retour',
   },
   es: {
     // Navbar
@@ -305,6 +311,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Splash
     'splash.companion': 'Tu Compañero de Fútbol',
+    
+    // Common
+    'common.back': 'Volver',
   },
   ht: {
     // Navbar
@@ -404,6 +413,9 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Splash
     'splash.companion': 'Patnè Foutbòl Ou',
+    
+    // Common
+    'common.back': 'Retounen',
   },
 };
 

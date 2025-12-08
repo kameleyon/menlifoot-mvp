@@ -60,8 +60,15 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src={menlifootBall} alt="Menlifoot" className="h-8 w-8 md:h-10 md:w-10" />
-            <span className="font-display text-2xl md:text-3xl font-light tracking-wide text-gradient-gold">
+            <motion.img 
+              src={menlifootBall} 
+              alt="Menlifoot" 
+              className="h-8 w-8 md:h-10 md:w-10"
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              whileHover={{ scale: 1.2, rotate: 720 }}
+            />
+            <span className="font-display text-2xl md:text-3xl font-light tracking-wide text-gradient-gold uppercase">
               MENLIFOOT
             </span>
           </Link>

@@ -77,6 +77,14 @@ const translations: Record<Language, Record<string, string>> = {
     'ai.placeholder': 'Ask me anything about soccer...',
     'ai.greeting': 'Hey! I\'m your soccer companion. Ask me anything about the beautiful game!',
     
+    // Chat Section
+    'chat.aiPowered': 'AI-Powered',
+    'chat.askThe': 'Ask the',
+    'chat.soccerAI': 'Soccer AI',
+    'chat.description': 'Get instant answers about match predictions, player stats, transfer news, tactics, and everything football.',
+    'chat.alwaysReady': 'Always ready to help',
+    'chat.tryAsking': 'Try asking:',
+    
     // Footer
     'footer.tagline': 'Your ultimate soccer companion. Stay connected with the beautiful game through podcasts, news, and community.',
     'footer.company': 'Company',
@@ -167,6 +175,14 @@ const translations: Record<Language, Record<string, string>> = {
     'ai.title': 'IA Football',
     'ai.placeholder': 'Posez-moi une question sur le football...',
     'ai.greeting': 'Salut! Je suis votre compagnon football. Demandez-moi n\'importe quoi sur le beau jeu!',
+    
+    // Chat Section
+    'chat.aiPowered': 'Propulsé par l\'IA',
+    'chat.askThe': 'Demandez à',
+    'chat.soccerAI': 'l\'IA Football',
+    'chat.description': 'Obtenez des réponses instantanées sur les prédictions de matchs, statistiques de joueurs, actualités transferts et tout le football.',
+    'chat.alwaysReady': 'Toujours prêt à aider',
+    'chat.tryAsking': 'Essayez de demander:',
     
     // Footer
     'footer.tagline': 'Votre compagnon football ultime. Restez connecté au beau jeu grâce aux podcasts, actualités et communauté.',
@@ -259,6 +275,14 @@ const translations: Record<Language, Record<string, string>> = {
     'ai.placeholder': 'Pregúntame cualquier cosa sobre fútbol...',
     'ai.greeting': '¡Hola! Soy tu compañero de fútbol. ¡Pregúntame lo que quieras sobre el hermoso juego!',
     
+    // Chat Section
+    'chat.aiPowered': 'Impulsado por IA',
+    'chat.askThe': 'Pregunta a la',
+    'chat.soccerAI': 'IA de Fútbol',
+    'chat.description': 'Obtén respuestas instantáneas sobre predicciones, estadísticas de jugadores, noticias de fichajes y todo sobre fútbol.',
+    'chat.alwaysReady': 'Siempre listo para ayudar',
+    'chat.tryAsking': 'Intenta preguntar:',
+    
     // Footer
     'footer.tagline': 'Tu compañero definitivo de fútbol. Mantente conectado con el hermoso juego a través de podcasts, noticias y comunidad.',
     'footer.company': 'Empresa',
@@ -349,6 +373,14 @@ const translations: Record<Language, Record<string, string>> = {
     'ai.title': 'IA Foutbòl',
     'ai.placeholder': 'Mande m nenpòt bagay sou foutbòl...',
     'ai.greeting': 'Sak pase! Mwen se patnè foutbòl ou. Mande m nenpòt bagay sou bèl jwèt la!',
+    
+    // Chat Section
+    'chat.aiPowered': 'Avèk Pouvwa IA',
+    'chat.askThe': 'Mande',
+    'chat.soccerAI': 'IA Foutbòl la',
+    'chat.description': 'Jwenn repons imedyat sou prediksyon match, estatistik jwè, nouvèl transfè, ak tout bagay sou foutbòl.',
+    'chat.alwaysReady': 'Toujou pare pou ede',
+    'chat.tryAsking': 'Eseye mande:',
     
     // Footer
     'footer.tagline': 'Patnè foutbòl final ou. Rete konekte ak bèl jwèt la atravè podcast, nouvèl, ak kominote.',

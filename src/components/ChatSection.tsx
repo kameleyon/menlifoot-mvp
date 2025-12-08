@@ -118,7 +118,7 @@ const ChatSection = () => {
             <Sparkles className="h-4 w-4" />
             {t('chat.poweredBy')}
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gradient-gold">
+          <h2 className="text-4xl md:text-5xl font-light tracking-wider mb-4 text-gradient-gold uppercase" style={{ fontFamily: "'Oswald', sans-serif" }}>
             {t('chat.askThe')} <span>{t('chat.expertName')}</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">

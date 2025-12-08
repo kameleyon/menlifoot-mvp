@@ -13,8 +13,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Navbar
     'nav.home': 'Home',
     'nav.podcast': 'Podcast',
-    'nav.news': 'News',
-    'nav.social': 'Social',
+    'nav.askMenlifoot': 'Ask Menlifoot',
     'nav.store': 'Store',
     'nav.signIn': 'Sign In',
     
@@ -73,14 +72,15 @@ const translations: Record<Language, Record<string, string>> = {
     'social.subscribers': 'subscribers',
     
     // AI Agent
-    'ai.title': 'Soccer AI',
+    'ai.title': 'Menlifoot Expert',
+    'ai.subtitle': 'Powered by Prof Menlifoot',
     'ai.placeholder': 'Ask me anything about soccer...',
-    'ai.greeting': 'Hey! I\'m your soccer companion. Ask me anything about the beautiful game!',
+    'ai.greeting': 'Hey! I\'m your Menlifoot Expert. Got questions about match predictions, player stats, transfer news, or World Cup 2026? Let\'s talk football.',
     
     // Chat Section
-    'chat.aiPowered': 'AI-Powered',
+    'chat.poweredBy': 'Powered by Prof Menlifoot',
     'chat.askThe': 'Ask the',
-    'chat.soccerAI': 'Soccer AI',
+    'chat.expertName': 'Menlifoot Expert',
     'chat.description': 'Get instant answers about match predictions, player stats, transfer news, tactics, and everything football.',
     'chat.alwaysReady': 'Always ready to help',
     'chat.tryAsking': 'Try asking:',
@@ -112,8 +112,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Navbar
     'nav.home': 'Accueil',
     'nav.podcast': 'Podcast',
-    'nav.news': 'Actualités',
-    'nav.social': 'Social',
+    'nav.askMenlifoot': 'Demander Menlifoot',
     'nav.store': 'Boutique',
     'nav.signIn': 'Connexion',
     
@@ -172,14 +171,15 @@ const translations: Record<Language, Record<string, string>> = {
     'social.subscribers': 'abonnés',
     
     // AI Agent
-    'ai.title': 'IA Football',
+    'ai.title': 'Expert Menlifoot',
+    'ai.subtitle': 'Propulsé par Prof Menlifoot',
     'ai.placeholder': 'Posez-moi une question sur le football...',
-    'ai.greeting': 'Salut! Je suis votre compagnon football. Demandez-moi n\'importe quoi sur le beau jeu!',
+    'ai.greeting': 'Salut! Je suis votre Expert Menlifoot. Des questions sur les prédictions de matchs, les stats des joueurs, les nouvelles de transferts ou la Coupe du Monde 2026? Parlons football.',
     
     // Chat Section
-    'chat.aiPowered': 'Propulsé par l\'IA',
+    'chat.poweredBy': 'Propulsé par Prof Menlifoot',
     'chat.askThe': 'Demandez à',
-    'chat.soccerAI': 'l\'IA Football',
+    'chat.expertName': 'l\'Expert Menlifoot',
     'chat.description': 'Obtenez des réponses instantanées sur les prédictions de matchs, statistiques de joueurs, actualités transferts et tout le football.',
     'chat.alwaysReady': 'Toujours prêt à aider',
     'chat.tryAsking': 'Essayez de demander:',
@@ -211,8 +211,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Navbar
     'nav.home': 'Inicio',
     'nav.podcast': 'Podcast',
-    'nav.news': 'Noticias',
-    'nav.social': 'Social',
+    'nav.askMenlifoot': 'Preguntar Menlifoot',
     'nav.store': 'Tienda',
     'nav.signIn': 'Iniciar Sesión',
     
@@ -271,14 +270,15 @@ const translations: Record<Language, Record<string, string>> = {
     'social.subscribers': 'suscriptores',
     
     // AI Agent
-    'ai.title': 'IA de Fútbol',
+    'ai.title': 'Experto Menlifoot',
+    'ai.subtitle': 'Impulsado por Prof Menlifoot',
     'ai.placeholder': 'Pregúntame cualquier cosa sobre fútbol...',
-    'ai.greeting': '¡Hola! Soy tu compañero de fútbol. ¡Pregúntame lo que quieras sobre el hermoso juego!',
+    'ai.greeting': '¡Hola! Soy tu Experto Menlifoot. ¿Tienes preguntas sobre predicciones, estadísticas de jugadores, noticias de fichajes o el Mundial 2026? Hablemos de fútbol.',
     
     // Chat Section
-    'chat.aiPowered': 'Impulsado por IA',
-    'chat.askThe': 'Pregunta a la',
-    'chat.soccerAI': 'IA de Fútbol',
+    'chat.poweredBy': 'Impulsado por Prof Menlifoot',
+    'chat.askThe': 'Pregunta al',
+    'chat.expertName': 'Experto Menlifoot',
     'chat.description': 'Obtén respuestas instantáneas sobre predicciones, estadísticas de jugadores, noticias de fichajes y todo sobre fútbol.',
     'chat.alwaysReady': 'Siempre listo para ayudar',
     'chat.tryAsking': 'Intenta preguntar:',
@@ -310,8 +310,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Navbar
     'nav.home': 'Lakay',
     'nav.podcast': 'Podcast',
-    'nav.news': 'Nouvèl',
-    'nav.social': 'Sosyal',
+    'nav.askMenlifoot': 'Mande Menlifoot',
     'nav.store': 'Boutik',
     'nav.signIn': 'Konekte',
     
@@ -370,14 +369,15 @@ const translations: Record<Language, Record<string, string>> = {
     'social.subscribers': 'abòne',
     
     // AI Agent
-    'ai.title': 'IA Foutbòl',
+    'ai.title': 'Ekspè Menlifoot',
+    'ai.subtitle': 'Pouvwa pa Prof Menlifoot',
     'ai.placeholder': 'Mande m nenpòt bagay sou foutbòl...',
-    'ai.greeting': 'Sak pase! Mwen se patnè foutbòl ou. Mande m nenpòt bagay sou bèl jwèt la!',
+    'ai.greeting': 'Sak pase! Mwen se Ekspè Menlifoot ou. Ou gen kesyon sou prediksyon match, estatistik jwè, nouvèl transfè, oswa Koup di Mond 2026? Ann pale foutbòl.',
     
     // Chat Section
-    'chat.aiPowered': 'Avèk Pouvwa IA',
+    'chat.poweredBy': 'Pouvwa pa Prof Menlifoot',
     'chat.askThe': 'Mande',
-    'chat.soccerAI': 'IA Foutbòl la',
+    'chat.expertName': 'Ekspè Menlifoot la',
     'chat.description': 'Jwenn repons imedyat sou prediksyon match, estatistik jwè, nouvèl transfè, ak tout bagay sou foutbòl.',
     'chat.alwaysReady': 'Toujou pare pou ede',
     'chat.tryAsking': 'Eseye mande:',

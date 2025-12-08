@@ -49,7 +49,7 @@ const Footer = () => {
               className="inline-flex items-center gap-2"
             >
               <img src={menlifootBall} alt="Menlifoot" className="h-10 w-10" />
-              <span className="font-display text-3xl tracking-wide text-gradient-gold">
+              <span className="font-display text-3xl font-light tracking-wide text-gradient-gold">
                 MENLIFOOT
               </span>
             </motion.a>

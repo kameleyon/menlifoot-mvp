@@ -84,13 +84,13 @@ const Admin = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { user, isAdmin, loading, signOut } = useAuth();
+  const { user, isAdmin, loading, adminLoading, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
-    } else if (!loading && user && !isAdmin) {
+    } else if (!loading && !adminLoading && user && !isAdmin) {
       toast({
         title: 'Access Denied',
         description: 'You do not have admin privileges.',
@@ -98,7 +98,7 @@ const Admin = () => {
       });
       navigate('/');
     }
-  }, [user, isAdmin, loading, navigate, toast]);
+  }, [user, isAdmin, loading, adminLoading, navigate, toast]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -230,7 +230,7 @@ const Admin = () => {
     navigate('/');
   };
 
-  if (loading) {
+  if (loading || adminLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Loading...</div>

@@ -7,6 +7,7 @@ interface AuthContextType {
   session: Session | null;
   isAdmin: boolean;
   loading: boolean;
+  adminLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -19,6 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [adminLoading, setAdminLoading] = useState(true);
 
   const checkAdminRole = async (userId: string) => {
     const { data, error } = await supabase
@@ -48,7 +50,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (session?.user) {
           const adminStatus = await checkAdminRole(session.user.id);
-          if (isMounted) setIsAdmin(adminStatus);
+          if (isMounted) {
+            setIsAdmin(adminStatus);
+            setAdminLoading(false);
+          }
+        } else {
+          setAdminLoading(false);
         }
         setLoading(false);
       }
@@ -63,15 +70,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          setAdminLoading(true);
           // Use setTimeout to avoid Supabase deadlock
           setTimeout(async () => {
             if (isMounted) {
               const adminStatus = await checkAdminRole(session.user.id);
-              if (isMounted) setIsAdmin(adminStatus);
+              if (isMounted) {
+                setIsAdmin(adminStatus);
+                setAdminLoading(false);
+              }
             }
           }, 0);
         } else {
           setIsAdmin(false);
+          setAdminLoading(false);
         }
         setLoading(false);
       }
@@ -108,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, loading, adminLoading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

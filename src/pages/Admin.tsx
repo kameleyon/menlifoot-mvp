@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, Edit2, LogOut, ArrowLeft, Youtube, Music2 } from 'lucide-react';
+import menlifootBall from '@/assets/menlifoot-ball.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -265,8 +266,20 @@ const Admin = () => {
                 <ArrowLeft className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Back</span>
               </Button>
-              <h1 className="font-display text-xl sm:text-3xl font-bold text-gradient-gold">
-                Admin Panel
+              
+              {/* Animated Logo */}
+              <motion.img 
+                src={menlifootBall} 
+                alt="Menlifoot" 
+                className="h-8 w-8 sm:h-10 sm:w-10 animate-bounce-subtle"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+                whileHover={{ scale: 1.2, rotate: 15 }}
+              />
+              
+              <h1 className="font-display text-xl sm:text-3xl tracking-wide text-gradient-gold">
+                ADMIN PANEL
               </h1>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">

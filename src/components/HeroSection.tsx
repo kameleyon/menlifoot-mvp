@@ -1,13 +1,29 @@
 import { motion } from "framer-motion";
-import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Youtube, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import heroPodcast from "@/assets/hero-podcast.png";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePodcasts } from "@/hooks/usePodcasts";
 
 const HeroSection = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const { t } = useLanguage();
+  const { latestPodcast, loading } = usePodcasts();
+  const navigate = useNavigate();
+
+  const handleListenNow = () => {
+    if (latestPodcast) {
+      window.open(latestPodcast.original_url, '_blank');
+    } else {
+      navigate('/podcasts');
+    }
+  };
+
+  const handleBrowseEpisodes = () => {
+    navigate('/podcasts');
+  };
 
   return (
     <section
@@ -33,7 +49,7 @@ const HeroSection = () => {
               transition={{ duration: 0.6, delay: 3 }}
               className="inline-block px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs uppercase tracking-wider mb-6"
             >
-              {t('hero.newEpisode')}
+              {latestPodcast ? `${t('hero.newEpisode')} #${latestPodcast.episode_number || ''}` : t('hero.newEpisode')}
             </motion.span>
 
             <motion.h1
@@ -62,11 +78,11 @@ const HeroSection = () => {
               transition={{ duration: 0.6, delay: 3.5 }}
               className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4"
             >
-              <Button variant="gold" size="default" className="gap-2 text-sm sm:text-base">
+              <Button variant="gold" size="default" className="gap-2 text-sm sm:text-base" onClick={handleListenNow}>
                 <Play className="h-4 w-4 sm:h-5 sm:w-5" />
                 {t('hero.listenNow')}
               </Button>
-              <Button variant="outline" size="default" className="text-sm sm:text-base">
+              <Button variant="outline" size="default" className="text-sm sm:text-base" onClick={handleBrowseEpisodes}>
                 {t('hero.browseEpisodes')}
               </Button>
             </motion.div>
@@ -80,11 +96,21 @@ const HeroSection = () => {
             >
               <div className="flex items-center gap-2 sm:gap-4">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
-                  <span className="text-primary-foreground font-bold text-xs sm:text-base">EP</span>
+                  {loading ? (
+                    <span className="text-primary-foreground font-bold text-xs sm:text-base">EP</span>
+                  ) : latestPodcast?.platform === 'youtube' ? (
+                    <Youtube className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
+                  ) : (
+                    <Music2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs sm:text-sm font-medium text-foreground truncate">{t('hero.episodeTitle')}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">{t('hero.episodeInfo')}</p>
+                  <p className="text-xs sm:text-sm font-medium text-foreground truncate">
+                    {loading ? t('hero.episodeTitle') : latestPodcast?.title || t('hero.episodeTitle')}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
+                    {loading ? t('hero.episodeInfo') : latestPodcast ? `${latestPodcast.platform} • ${latestPodcast.duration || ''}` : t('hero.episodeInfo')}
+                  </p>
                 </div>
                 <div className="flex items-center gap-0 sm:gap-1">
                   <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 text-foreground/70">
@@ -94,7 +120,7 @@ const HeroSection = () => {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 sm:h-10 sm:w-10 text-primary"
-                    onClick={() => setIsPlaying(!isPlaying)}
+                    onClick={handleListenNow}
                   >
                     {isPlaying ? (
                       <Pause className="h-4 w-4 sm:h-5 sm:w-5" />

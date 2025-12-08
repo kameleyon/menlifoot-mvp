@@ -91,8 +91,8 @@ const Navbar = () => {
 
           {/* Language & Actions */}
           <div className="flex items-center gap-3">
-            {/* Language Selector */}
-            <div className="relative hidden md:block">
+            {/* Language Selector - visible on all screens */}
+            <div className="relative">
               <Button
                 variant="ghost"
                 size="sm"
@@ -103,8 +103,8 @@ const Navbar = () => {
                 }}
               >
                 <Languages className="h-4 w-4" />
-                <span className="text-xs uppercase">{language}</span>
-                <ChevronDown className={`h-3 w-3 transition-transform ${isLangMenuOpen ? 'rotate-180' : ''}`} />
+                <span className="text-xs uppercase hidden sm:inline">{language}</span>
+                <ChevronDown className={`h-3 w-3 transition-transform hidden sm:inline ${isLangMenuOpen ? 'rotate-180' : ''}`} />
               </Button>
               
               <AnimatePresence>
@@ -114,7 +114,7 @@ const Navbar = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-full right-0 mt-2 w-36 glass-card py-2 shadow-xl"
+                    className="absolute top-full right-0 mt-2 w-36 glass-card py-2 shadow-xl z-50"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {languages.map((lang) => (
@@ -206,33 +206,13 @@ const Navbar = () => {
                 )
               ))}
               
-              {/* Mobile Language Selector */}
-              <div className="py-3 border-t border-border/50">
-                <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Language</p>
-                <div className="flex flex-wrap gap-2">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => {
-                        setLanguage(lang.code);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                        language === lang.code
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-surface-elevated text-foreground/70 hover:text-primary'
-                      }`}
-                    >
-                      {lang.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="nav" className="w-full mt-4">
-                  Admin
-                </Button>
+              {/* Admin Link in Mobile Menu */}
+              <Link 
+                to="/admin" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block py-3 text-foreground/80 hover:text-primary transition-colors border-t border-border/50 mt-2 pt-4"
+              >
+                Admin
               </Link>
             </div>
           </motion.div>

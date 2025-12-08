@@ -23,8 +23,13 @@ const Podcasts = () => {
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
   const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null);
   const [loading, setLoading] = useState(true);
+  const [platformFilter, setPlatformFilter] = useState<'all' | 'youtube' | 'spotify'>('all');
   const navigate = useNavigate();
   const { t } = useLanguage();
+
+  const filteredPodcasts = podcasts.filter(
+    (podcast) => platformFilter === 'all' || podcast.platform === platformFilter
+  );
 
   useEffect(() => {
     fetchPodcasts();
@@ -178,11 +183,47 @@ const Podcasts = () => {
               {/* Episodes List */}
               <div className="lg:col-span-1">
                 <div className="glass-card p-4">
-                  <h3 className="font-display text-lg font-semibold mb-4 px-2">
-                    All Episodes ({podcasts.length})
+                  <h3 className="font-display text-lg font-semibold mb-3 px-2">
+                    All Episodes ({filteredPodcasts.length})
                   </h3>
+                  
+                  {/* Platform Filter */}
+                  <div className="flex gap-2 mb-4 px-2">
+                    <button
+                      onClick={() => setPlatformFilter('all')}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        platformFilter === 'all'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-surface text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      All
+                    </button>
+                    <button
+                      onClick={() => setPlatformFilter('youtube')}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 ${
+                        platformFilter === 'youtube'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-surface text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Youtube className="h-3 w-3" />
+                      YouTube
+                    </button>
+                    <button
+                      onClick={() => setPlatformFilter('spotify')}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 ${
+                        platformFilter === 'spotify'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-surface text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Music2 className="h-3 w-3" />
+                      Spotify
+                    </button>
+                  </div>
                   <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                    {podcasts.map((podcast) => (
+                    {filteredPodcasts.map((podcast) => (
                       <button
                         key={podcast.id}
                         onClick={() => setSelectedPodcast(podcast)}

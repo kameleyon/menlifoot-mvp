@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
-        display: ['Playfair Display', 'serif'],
+        display: ['Bebas Neue', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -125,6 +125,15 @@ export default {
           "0%": { opacity: "0", letterSpacing: "0.5em" },
           "100%": { opacity: "1", letterSpacing: "0.1em" },
         },
+        "spin-slow": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        "bounce-subtle": {
+          "0%, 100%": { transform: "translateY(0) rotate(0deg)" },
+          "25%": { transform: "translateY(-8px) rotate(5deg)" },
+          "75%": { transform: "translateY(-4px) rotate(-3deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -139,6 +148,8 @@ export default {
         "shimmer": "shimmer 2s linear infinite",
         "intro-zoom": "intro-zoom 1.5s ease-out forwards",
         "intro-text": "intro-text 1s ease-out forwards",
+        "spin-slow": "spin-slow 8s linear infinite",
+        "bounce-subtle": "bounce-subtle 2s ease-in-out infinite",
       },
     },
   },

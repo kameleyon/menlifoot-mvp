@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Send, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,15 @@ const ChatSection = () => {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update initial greeting message when language changes
+  useEffect(() => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === 1 && msg.type === "bot" 
+        ? { ...msg, content: t('ai.greeting') }
+        : msg
+    ));
+  }, [language, t]);
 
   const suggestivePrompts = [
     { en: "Who will win the Champions League?", fr: "Qui va gagner la Ligue des Champions?", es: "¿Quién ganará la Champions League?", ht: "Ki moun ki pral genyen Lig Chanpyon an?" },
@@ -109,8 +118,8 @@ const ChatSection = () => {
             <Sparkles className="h-4 w-4" />
             {t('chat.poweredBy')}
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            {t('chat.askThe')} <span className="text-gradient">{t('chat.expertName')}</span>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gradient-gold">
+            {t('chat.askThe')} <span>{t('chat.expertName')}</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             {t('chat.description')}

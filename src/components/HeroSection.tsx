@@ -38,7 +38,7 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+        <div className="flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-20">
           {/* Text Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -52,7 +52,7 @@ const HeroSection = () => {
               transition={{ duration: 0.6, delay: 3 }}
               className="inline-block px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs uppercase tracking-wider mb-6"
             >
-              {latestPodcast ? `${t('hero.newEpisode')} #${latestPodcast.episode_number || ''}` : t('hero.newEpisode')}
+              {t('hero.newEpisode')}
             </motion.span>
 
             <motion.h1

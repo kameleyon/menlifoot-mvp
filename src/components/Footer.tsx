@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Twitter, Instagram, Youtube, Send, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import soccerBallIcon from "@/assets/soccer-ball-icon.png";
+import menlifootBall from "@/assets/menlifoot-ball.png";
 
 const Footer = () => {
   const { t } = useLanguage();
@@ -48,7 +48,7 @@ const Footer = () => {
               viewport={{ once: true }}
               className="inline-flex items-center gap-2"
             >
-              <img src={soccerBallIcon} alt="Menlifoot" className="h-10 w-10" />
+              <img src={menlifootBall} alt="Menlifoot" className="h-10 w-10" />
               <span className="font-display text-3xl font-bold text-gradient-gold">
                 Menlifoot
               </span>

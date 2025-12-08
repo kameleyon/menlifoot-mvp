@@ -4,6 +4,8 @@ import { MessageSquare, X, Send, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
+import { useLanguage } from "@/contexts/LanguageContext";
+import soccerBallIcon from "@/assets/soccer-ball-icon.png";
 
 interface Message {
   id: number;
@@ -12,12 +14,13 @@ interface Message {
 }
 
 const AIAgent = () => {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       type: "bot",
-      content: "Hey! I'm your Menlifoot Soccer AI. Got questions about match predictions, player stats, transfer news, or World Cup 2026? Let's talk football.",
+      content: t('ai.greeting'),
     },
   ]);
   const [input, setInput] = useState("");
@@ -109,17 +112,19 @@ const AIAgent = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center">
-                      <div className="w-5 h-5 rounded-full bg-background" />
-                    </div>
+                    <img 
+                      src={soccerBallIcon} 
+                      alt="Menlifoot Expert" 
+                      className="w-10 h-10 rounded-full object-cover border-2 border-primary/50"
+                    />
                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-medium text-foreground">Soccer AI</span>
+                      <span className="font-medium text-foreground">{t('ai.title')}</span>
                       <Sparkles className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <span className="text-xs text-muted-foreground">Always ready to help</span>
+                    <span className="text-xs text-muted-foreground">{t('ai.subtitle')}</span>
                   </div>
                 </div>
                 <Button
@@ -169,7 +174,7 @@ const AIAgent = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Ask about soccer..."
+                  placeholder={t('ai.placeholder')}
                   disabled={isLoading}
                   className="flex-1 bg-surface-elevated rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
                 />

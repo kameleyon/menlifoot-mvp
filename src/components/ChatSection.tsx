@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Sparkles, Loader2, MessageSquare } from "lucide-react";
+import { Send, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import { useLanguage } from "@/contexts/LanguageContext";
-import aiAvatar from "@/assets/ai-avatar.png";
+import soccerBallIcon from "@/assets/soccer-ball-icon.png";
 
 interface Message {
   id: number;
@@ -14,12 +14,12 @@ interface Message {
 }
 
 const ChatSection = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       type: "bot",
-      content: "Hey! I'm your Menlifoot Soccer AI. Got questions about match predictions, player stats, transfer news, or World Cup 2026? Let's talk football.",
+      content: t('ai.greeting'),
     },
   ]);
   const [input, setInput] = useState("");
@@ -91,8 +91,7 @@ const ChatSection = () => {
   };
 
   const getLocalizedPrompt = (prompt: typeof suggestivePrompts[0]) => {
-    const lang = localStorage.getItem('menlifoot-language') || 'en';
-    return prompt[lang as keyof typeof prompt] || prompt.en;
+    return prompt[language as keyof typeof prompt] || prompt.en;
   };
 
   return (
@@ -108,10 +107,10 @@ const ChatSection = () => {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6">
             <Sparkles className="h-4 w-4" />
-            {t('chat.aiPowered')}
+            {t('chat.poweredBy')}
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            {t('chat.askThe')} <span className="text-gradient">{t('chat.soccerAI')}</span>
+            {t('chat.askThe')} <span className="text-gradient">{t('chat.expertName')}</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             {t('chat.description')}
@@ -131,8 +130,8 @@ const ChatSection = () => {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img 
-                  src={aiAvatar} 
-                  alt="Soccer AI" 
+                  src={soccerBallIcon} 
+                  alt="Menlifoot Expert" 
                   className="w-12 h-12 rounded-full object-cover border-2 border-primary/50"
                 />
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
@@ -142,7 +141,7 @@ const ChatSection = () => {
                   <span className="font-semibold text-foreground">{t('ai.title')}</span>
                   <Sparkles className="h-4 w-4 text-primary" />
                 </div>
-                <span className="text-sm text-muted-foreground">{t('chat.alwaysReady')}</span>
+                <span className="text-sm text-muted-foreground">{t('ai.subtitle')}</span>
               </div>
             </div>
           </div>

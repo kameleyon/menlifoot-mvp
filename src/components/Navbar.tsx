@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Languages, ShoppingCart, ChevronDown } from "lucide-react";
-import soccerBallIcon from "@/assets/soccer-ball-icon.png";
+import menlifootBall from "@/assets/menlifoot-ball.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
@@ -60,7 +60,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src={soccerBallIcon} alt="Menlifoot" className="h-8 w-8 md:h-10 md:w-10" />
+            <img src={menlifootBall} alt="Menlifoot" className="h-8 w-8 md:h-10 md:w-10" />
             <span className="font-display text-2xl md:text-3xl font-bold text-gradient-gold">
               Menlifoot
             </span>

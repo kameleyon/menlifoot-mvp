@@ -61,7 +61,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <img src={menlifootBall} alt="Menlifoot" className="h-8 w-8 md:h-10 md:w-10" />
-            <span className="font-display text-2xl md:text-3xl tracking-wide text-gradient-gold">
+            <span className="font-display text-2xl md:text-3xl font-light tracking-wide text-gradient-gold">
               MENLIFOOT
             </span>
           </Link>

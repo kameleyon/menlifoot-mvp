@@ -1,21 +1,21 @@
 import { motion } from "framer-motion";
-import { Play, Pause, SkipBack, SkipForward, Youtube, Music2 } from "lucide-react";
+import { Play, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import heroPodcast from "@/assets/hero-podcast.png";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePodcasts } from "@/hooks/usePodcasts";
 
 const HeroSection = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
   const { t } = useLanguage();
   const { latestPodcast, loading } = usePodcasts();
   const navigate = useNavigate();
 
   const handleListenNow = () => {
     if (latestPodcast) {
-      window.open(latestPodcast.original_url, '_blank');
+      // Scroll to the embedded player
+      const playerElement = document.getElementById('hero-podcast-player');
+      playerElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
       navigate('/podcasts');
     }
@@ -87,56 +87,62 @@ const HeroSection = () => {
               </Button>
             </motion.div>
 
-            {/* Mini Player */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 3.7 }}
-              className="mt-10 glass-card p-3 sm:p-4 max-w-[280px] sm:max-w-md mx-auto lg:mx-0"
-            >
-              <div className="flex items-center gap-2 sm:gap-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
-                  {loading ? (
-                    <span className="text-primary-foreground font-bold text-xs sm:text-base">EP</span>
-                  ) : latestPodcast?.platform === 'youtube' ? (
-                    <Youtube className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
-                  ) : (
+            {/* Embedded Player */}
+            {latestPodcast && (
+              <motion.div
+                id="hero-podcast-player"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 3.7 }}
+                className="mt-10 max-w-[320px] sm:max-w-md mx-auto lg:mx-0"
+              >
+                {latestPodcast.platform === 'spotify' ? (
+                  <iframe
+                    src={latestPodcast.embed_url}
+                    width="100%"
+                    height="152"
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                    className="rounded-xl"
+                    title={latestPodcast.title}
+                  />
+                ) : latestPodcast.platform === 'youtube' ? (
+                  <iframe
+                    src={latestPodcast.embed_url}
+                    width="100%"
+                    height="152"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    loading="lazy"
+                    className="rounded-xl"
+                    title={latestPodcast.title}
+                  />
+                ) : null}
+              </motion.div>
+            )}
+            
+            {!latestPodcast && !loading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 3.7 }}
+                className="mt-10 glass-card p-3 sm:p-4 max-w-[280px] sm:max-w-md mx-auto lg:mx-0"
+              >
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
                     <Music2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
-                  )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-medium text-foreground truncate">
+                      {t('hero.episodeTitle')}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
+                      {t('hero.episodeInfo')}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs sm:text-sm font-medium text-foreground truncate">
-                    {loading ? t('hero.episodeTitle') : latestPodcast?.title || t('hero.episodeTitle')}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">
-                    {loading ? t('hero.episodeInfo') : latestPodcast ? `${latestPodcast.platform} • ${latestPodcast.duration || ''}` : t('hero.episodeInfo')}
-                  </p>
-                </div>
-                <div className="flex items-center gap-0 sm:gap-1">
-                  <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 text-foreground/70">
-                    <SkipBack className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 sm:h-10 sm:w-10 text-primary"
-                    onClick={handleListenNow}
-                  >
-                    {isPlaying ? (
-                      <Pause className="h-4 w-4 sm:h-5 sm:w-5" />
-                    ) : (
-                      <Play className="h-4 w-4 sm:h-5 sm:w-5" />
-                    )}
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 text-foreground/70">
-                    <SkipForward className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </Button>
-                </div>
-              </div>
-              <div className="mt-2 sm:mt-3 h-1 bg-muted rounded-full overflow-hidden">
-                <div className="h-full w-1/3 bg-gradient-gold rounded-full" />
-              </div>
-            </motion.div>
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Hero Image */}

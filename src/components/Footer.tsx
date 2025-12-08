@@ -1,36 +1,36 @@
 import { motion } from "framer-motion";
-import { Twitter, Instagram, Youtube, Send } from "lucide-react";
+import { Twitter, Instagram, Youtube, Send, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import soccerBallIcon from "@/assets/soccer-ball-icon.png";
 
 const Footer = () => {
   const { t } = useLanguage();
 
   const footerLinks = {
     [t('footer.company')]: [
-      { key: 'aboutUs', label: t('footer.aboutUs') },
-      { key: 'careers', label: t('footer.careers') },
-      { key: 'press', label: t('footer.press') },
-      { key: 'contact', label: t('footer.contact') },
+      { key: 'aboutUs', label: t('footer.aboutUs'), href: '#' },
+      { key: 'helpCenter', label: t('footer.helpCenter'), href: '#' },
+      { key: 'privacyPolicy', label: t('footer.privacyPolicy'), href: '#' },
+      { key: 'termsOfService', label: t('footer.termsOfService'), href: '#' },
+      { key: 'cookiePolicy', label: t('footer.cookiePolicy'), href: '#' },
     ],
     [t('footer.content')]: [
-      { key: 'podcast', label: t('footer.podcast') },
-      { key: 'news', label: t('footer.news') },
-      { key: 'videos', label: t('footer.videos') },
-      { key: 'newsletter', label: t('footer.newsletter') },
-    ],
-    [t('footer.support')]: [
-      { key: 'helpCenter', label: t('footer.helpCenter') },
-      { key: 'privacyPolicy', label: t('footer.privacyPolicy') },
-      { key: 'termsOfService', label: t('footer.termsOfService') },
-      { key: 'cookiePolicy', label: t('footer.cookiePolicy') },
+      { key: 'podcast', label: t('footer.podcast'), href: '/podcasts' },
+      { key: 'store', label: t('nav.store'), href: '#store' },
     ],
   };
 
   const socialLinks = [
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Youtube, href: "#", label: "YouTube" },
+    { icon: Facebook, href: "https://facebook.com/MenlifootAyiti", label: "Facebook" },
+    { icon: Instagram, href: "https://instagram.com/menlifoot", label: "Instagram" },
+    { icon: Twitter, href: "https://twitter.com/menlifoot", label: "Twitter" },
+    { icon: () => (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+      </svg>
+    ), href: "https://tiktok.com/@menlifoot", label: "TikTok" },
+    { icon: Youtube, href: "https://youtube.com/@menlifoot3136", label: "YouTube" },
   ];
 
   return (
@@ -46,8 +46,9 @@ const Footer = () => {
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              className="inline-block"
+              className="inline-flex items-center gap-2"
             >
+              <img src={soccerBallIcon} alt="Menlifoot" className="h-10 w-10" />
               <span className="font-display text-3xl font-bold text-gradient-gold">
                 Menlifoot
               </span>
@@ -77,7 +78,7 @@ const Footer = () => {
                 {links.map((link) => (
                   <li key={link.key}>
                     <a
-                      href="#"
+                      href={link.href}
                       className="text-muted-foreground hover:text-primary transition-colors text-sm"
                     >
                       {link.label}
@@ -94,11 +95,13 @@ const Footer = () => {
           <p className="text-sm text-muted-foreground">
             © 2024 Menlifoot. {t('footer.rights')}
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {socialLinks.map((social) => (
               <a
                 key={social.label}
                 href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label={social.label}
                 className="w-10 h-10 rounded-full bg-surface-elevated flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
               >

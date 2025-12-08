@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Languages, ShoppingCart, ChevronDown } from "lucide-react";
+import soccerBallIcon from "@/assets/soccer-ball-icon.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
@@ -58,7 +59,8 @@ const Navbar = () => {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center gap-2">
+            <img src={soccerBallIcon} alt="Menlifoot" className="h-8 w-8 md:h-10 md:w-10" />
             <span className="font-display text-2xl md:text-3xl font-bold text-gradient-gold">
               Menlifoot
             </span>
@@ -148,13 +150,15 @@ const Navbar = () => {
                 </span>
               )}
             </Button>
-            <Button
-              variant="nav"
-              size="sm"
-              className="hidden md:flex"
-            >
-              {t('nav.signIn')}
-            </Button>
+            <Link to="/admin">
+              <Button
+                variant="nav"
+                size="sm"
+                className="hidden md:flex"
+              >
+                Admin
+              </Button>
+            </Link>
 
             {/* Mobile Menu Toggle */}
             <Button
@@ -225,9 +229,11 @@ const Navbar = () => {
                 </div>
               </div>
               
-              <Button variant="nav" className="w-full mt-4">
-                {t('nav.signIn')}
-              </Button>
+              <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="nav" className="w-full mt-4">
+                  Admin
+                </Button>
+              </Link>
             </div>
           </motion.div>
         )}

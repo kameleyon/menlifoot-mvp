@@ -254,25 +254,31 @@ const Admin = () => {
           className="max-w-6xl mx-auto"
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between mb-8 gap-2">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Button
                 variant="ghost"
+                size="sm"
                 onClick={() => navigate('/')}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground px-2 sm:px-4"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back</span>
               </Button>
-              <h1 className="font-display text-3xl font-bold text-gradient-gold">
+              <h1 className="font-display text-xl sm:text-3xl font-bold text-gradient-gold">
                 Admin Panel
               </h1>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">{user?.email}</span>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
+            <div className="flex items-center gap-2 sm:gap-4">
+              {/* Profile Avatar */}
+              <div className="w-8 h-8 rounded-full bg-gradient-gold flex items-center justify-center flex-shrink-0">
+                <span className="text-sm font-bold text-primary-foreground uppercase">
+                  {user?.email?.charAt(0) || 'A'}
+                </span>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="flex-shrink-0">
+                <LogOut className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>

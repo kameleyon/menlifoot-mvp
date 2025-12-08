@@ -5,15 +5,18 @@ import { useNavigate } from "react-router-dom";
 import heroPodcast from "@/assets/hero-podcast.png";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePodcasts } from "@/hooks/usePodcasts";
+import { useState } from "react";
 
 const HeroSection = () => {
   const { t } = useLanguage();
   const { latestPodcast, loading } = usePodcasts();
   const navigate = useNavigate();
+  const [autoplay, setAutoplay] = useState(false);
 
   const handleListenNow = () => {
     if (latestPodcast) {
-      // Scroll to the embedded player
+      // Enable autoplay and scroll to the embedded player
+      setAutoplay(true);
       const playerElement = document.getElementById('hero-podcast-player');
       playerElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
@@ -98,7 +101,7 @@ const HeroSection = () => {
               >
                 {latestPodcast.platform === 'spotify' ? (
                   <iframe
-                    src={latestPodcast.embed_url}
+                    src={autoplay ? `${latestPodcast.embed_url}${latestPodcast.embed_url.includes('?') ? '&' : '?'}autoplay=1` : latestPodcast.embed_url}
                     width="100%"
                     height="152"
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
@@ -108,7 +111,7 @@ const HeroSection = () => {
                   />
                 ) : latestPodcast.platform === 'youtube' ? (
                   <iframe
-                    src={latestPodcast.embed_url}
+                    src={autoplay ? `${latestPodcast.embed_url}${latestPodcast.embed_url.includes('?') ? '&' : '?'}autoplay=1` : latestPodcast.embed_url}
                     width="100%"
                     height="152"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

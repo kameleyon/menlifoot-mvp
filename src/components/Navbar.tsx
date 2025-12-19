@@ -34,8 +34,9 @@ const Navbar = () => {
   const navLinks = [
     { name: t('nav.home'), href: "/" },
     { name: t('nav.podcast'), href: "#podcast" },
+    { name: t('nav.articles'), href: "#articles" },
     { name: t('nav.askMenlifoot'), href: "#chat" },
-    { name: t('nav.store'), href: "#store" },
+    // { name: t('nav.store'), href: "#store" },
   ];
 
   const languages: { code: Language; name: string }[] = [

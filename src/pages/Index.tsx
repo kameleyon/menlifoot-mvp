@@ -24,7 +24,7 @@ const Index = () => {
               <HeroSection />
               <ChatSection />
               <ArticlesSection />
-              <MerchSection />
+              {/* <MerchSection /> */}
             </main>
             <Footer />
             <AIAgent />

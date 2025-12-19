@@ -154,6 +154,7 @@ const Admin = () => {
     published_at: null as Date | null,
     is_published: false,
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user, isAdmin, loading, adminLoading, signOut } = useAuth();
@@ -367,6 +368,48 @@ const Admin = () => {
       published_at: null,
       is_published: false,
     });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Error', description: 'Please select an image file.', variant: 'destructive' });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Error', description: 'Image must be less than 5MB.', variant: 'destructive' });
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `articles/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('article-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('article-images')
+        .getPublicUrl(filePath);
+
+      setArticleFormData(prev => ({ ...prev, thumbnail_url: publicUrl }));
+      toast({ title: 'Success', description: 'Image uploaded!' });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to upload image.', variant: 'destructive' });
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -653,19 +696,52 @@ const Admin = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="article-thumbnail">Thumbnail URL</Label>
+                      <Label htmlFor="article-image">Article Image</Label>
                       <div className="flex gap-2">
                         <Input
-                          id="article-thumbnail"
+                          id="article-image"
                           value={articleFormData.thumbnail_url}
                           onChange={(e) => setArticleFormData(prev => ({ ...prev, thumbnail_url: e.target.value }))}
-                          placeholder="https://example.com/image.jpg"
+                          placeholder="Upload or paste image URL"
                           className="flex-1"
                         />
-                        <Button type="button" variant="outline" size="icon">
-                          <Image className="h-4 w-4" />
-                        </Button>
+                        <label htmlFor="image-upload">
+                          <Button type="button" variant="outline" size="icon" asChild disabled={uploadingImage}>
+                            <span>
+                              {uploadingImage ? (
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                              ) : (
+                                <Image className="h-4 w-4" />
+                              )}
+                            </span>
+                          </Button>
+                        </label>
+                        <input
+                          id="image-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
                       </div>
+                      {articleFormData.thumbnail_url && (
+                        <div className="mt-2 relative w-full h-32 rounded-lg overflow-hidden border border-border">
+                          <img 
+                            src={articleFormData.thumbnail_url} 
+                            alt="Article preview" 
+                            className="w-full h-full object-cover"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={() => setArticleFormData(prev => ({ ...prev, thumbnail_url: '' }))}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-2">

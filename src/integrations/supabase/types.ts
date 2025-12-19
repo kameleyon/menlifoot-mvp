@@ -23,6 +23,7 @@ export type Database = {
           id: string
           is_published: boolean | null
           keywords: string[] | null
+          original_language: string
           published_at: string | null
           subtitle: string | null
           summary: string | null
@@ -38,6 +39,7 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           keywords?: string[] | null
+          original_language?: string
           published_at?: string | null
           subtitle?: string | null
           summary?: string | null
@@ -53,6 +55,7 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           keywords?: string[] | null
+          original_language?: string
           published_at?: string | null
           subtitle?: string | null
           summary?: string | null

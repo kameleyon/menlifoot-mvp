@@ -126,6 +126,7 @@ const translations: Record<Language, Record<string, string>> = {
     'articles.sharedSuccess': 'Article shared successfully',
     'articles.shareError': 'Share failed',
     'articles.shareErrorDesc': 'Could not share the article',
+    'articles.translating': 'Translating...',
     
     // Common
     'common.back': 'Back',
@@ -247,6 +248,7 @@ const translations: Record<Language, Record<string, string>> = {
     'articles.sharedSuccess': 'Article partagé avec succès',
     'articles.shareError': 'Échec du partage',
     'articles.shareErrorDesc': 'Impossible de partager l\'article',
+    'articles.translating': 'Traduction en cours...',
     
     // Common
     'common.back': 'Retour',
@@ -368,6 +370,7 @@ const translations: Record<Language, Record<string, string>> = {
     'articles.sharedSuccess': 'Artículo compartido con éxito',
     'articles.shareError': 'Error al compartir',
     'articles.shareErrorDesc': 'No se pudo compartir el artículo',
+    'articles.translating': 'Traduciendo...',
     
     // Common
     'common.back': 'Volver',
@@ -489,6 +492,7 @@ const translations: Record<Language, Record<string, string>> = {
     'articles.sharedSuccess': 'Atik pataje avèk siksè',
     'articles.shareError': 'Echèk pataj',
     'articles.shareErrorDesc': 'Pa kapab pataje atik la',
+    'articles.translating': 'Ap tradui...',
     
     // Common
     'common.back': 'Retounen',

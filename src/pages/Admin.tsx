@@ -60,8 +60,16 @@ interface Article {
   thumbnail_url: string | null;
   published_at: string | null;
   is_published: boolean;
+  original_language: string;
   created_at: string;
 }
+
+const LANGUAGES = [
+  { code: 'en', name: 'English' },
+  { code: 'fr', name: 'French' },
+  { code: 'es', name: 'Spanish' },
+  { code: 'ht', name: 'Haitian Creole' },
+];
 
 const convertToEmbedUrl = (url: string, platform: string): string => {
   if (platform === 'spotify') {
@@ -153,6 +161,7 @@ const Admin = () => {
     thumbnail_url: '',
     published_at: null as Date | null,
     is_published: false,
+    original_language: 'en',
   });
   const [uploadingImage, setUploadingImage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -269,6 +278,7 @@ const Admin = () => {
       thumbnail_url: articleFormData.thumbnail_url || null,
       published_at: articleFormData.published_at?.toISOString() || (articleFormData.is_published ? new Date().toISOString() : null),
       is_published: articleFormData.is_published,
+      original_language: articleFormData.original_language,
       created_by: user?.id,
     };
 
@@ -319,6 +329,7 @@ const Admin = () => {
       thumbnail_url: article.thumbnail_url || '',
       published_at: article.published_at ? new Date(article.published_at) : null,
       is_published: article.is_published,
+      original_language: article.original_language || 'en',
     });
     setIsArticleDialogOpen(true);
   };
@@ -367,6 +378,7 @@ const Admin = () => {
       thumbnail_url: '',
       published_at: null,
       is_published: false,
+      original_language: 'en',
     });
   };
 
@@ -656,7 +668,7 @@ const Admin = () => {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label>Category *</Label>
                         <Select
@@ -669,6 +681,22 @@ const Admin = () => {
                           <SelectContent>
                             {ARTICLE_CATEGORIES.map((cat) => (
                               <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Language *</Label>
+                        <Select
+                          value={articleFormData.original_language}
+                          onValueChange={(value) => setArticleFormData(prev => ({ ...prev, original_language: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {LANGUAGES.map((lang) => (
+                              <SelectItem key={lang.code} value={lang.code}>{lang.name}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>

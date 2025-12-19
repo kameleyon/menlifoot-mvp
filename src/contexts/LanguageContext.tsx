@@ -121,6 +121,11 @@ const translations: Record<Language, Record<string, string>> = {
     'articles.removedFromSaved': 'Article removed from saved',
     'articles.copied': 'Copied',
     'articles.linkCopied': 'Link copied to clipboard',
+    'articles.keywords': 'Keywords',
+    'articles.shared': 'Shared',
+    'articles.sharedSuccess': 'Article shared successfully',
+    'articles.shareError': 'Share failed',
+    'articles.shareErrorDesc': 'Could not share the article',
     
     // Common
     'common.back': 'Back',
@@ -237,6 +242,11 @@ const translations: Record<Language, Record<string, string>> = {
     'articles.removedFromSaved': 'Article retiré des favoris',
     'articles.copied': 'Copié',
     'articles.linkCopied': 'Lien copié dans le presse-papiers',
+    'articles.keywords': 'Mots-clés',
+    'articles.shared': 'Partagé',
+    'articles.sharedSuccess': 'Article partagé avec succès',
+    'articles.shareError': 'Échec du partage',
+    'articles.shareErrorDesc': 'Impossible de partager l\'article',
     
     // Common
     'common.back': 'Retour',
@@ -353,6 +363,11 @@ const translations: Record<Language, Record<string, string>> = {
     'articles.removedFromSaved': 'Artículo eliminado de guardados',
     'articles.copied': 'Copiado',
     'articles.linkCopied': 'Enlace copiado al portapapeles',
+    'articles.keywords': 'Palabras clave',
+    'articles.shared': 'Compartido',
+    'articles.sharedSuccess': 'Artículo compartido con éxito',
+    'articles.shareError': 'Error al compartir',
+    'articles.shareErrorDesc': 'No se pudo compartir el artículo',
     
     // Common
     'common.back': 'Volver',
@@ -469,6 +484,11 @@ const translations: Record<Language, Record<string, string>> = {
     'articles.removedFromSaved': 'Atik retire nan sere yo',
     'articles.copied': 'Kopye',
     'articles.linkCopied': 'Lyen kopye nan pres-papye',
+    'articles.keywords': 'Mo Kle',
+    'articles.shared': 'Pataje',
+    'articles.sharedSuccess': 'Atik pataje avèk siksè',
+    'articles.shareError': 'Echèk pataj',
+    'articles.shareErrorDesc': 'Pa kapab pataje atik la',
     
     // Common
     'common.back': 'Retounen',

@@ -83,12 +83,17 @@ const ArticlesSection = () => {
     try {
       if (navigator.share) {
         await navigator.share(shareData);
+        toast({ title: t('articles.shared'), description: t('articles.sharedSuccess') });
       } else {
         await navigator.clipboard.writeText(`${article.title} - ${window.location.href}`);
         toast({ title: t('articles.copied'), description: t('articles.linkCopied') });
       }
     } catch (error) {
-      console.error('Error sharing:', error);
+      // User cancelled or share failed - only show error for clipboard failures
+      if (!navigator.share) {
+        console.error('Error sharing:', error);
+        toast({ title: t('articles.shareError'), description: t('articles.shareErrorDesc'), variant: 'destructive' });
+      }
     }
   };
 
@@ -247,10 +252,21 @@ const ArticlesSection = () => {
 
       {/* Article Detail Dialog */}
       <Dialog open={!!selectedArticle} onOpenChange={() => setSelectedArticle(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-background">
           {selectedArticle && (
-            <>
-              <DialogHeader>
+            <div className="space-y-4">
+              {/* Image at the top, separate from content */}
+              {selectedArticle.thumbnail_url && (
+                <div className="aspect-video overflow-hidden rounded-lg -mx-6 -mt-6">
+                  <img
+                    src={selectedArticle.thumbnail_url}
+                    alt={selectedArticle.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              
+              <DialogHeader className="pt-2">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs text-primary font-medium uppercase tracking-wider px-2 py-1 bg-primary/10 rounded">
                     {selectedArticle.category}
@@ -268,19 +284,9 @@ const ArticlesSection = () => {
                   </p>
                 )}
               </DialogHeader>
-              
-              {selectedArticle.thumbnail_url && (
-                <div className="aspect-video overflow-hidden rounded-lg my-4">
-                  <img
-                    src={selectedArticle.thumbnail_url}
-                    alt={selectedArticle.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
 
               {selectedArticle.summary && (
-                <p className="text-muted-foreground italic border-l-2 border-primary pl-4 mb-4">
+                <p className="text-muted-foreground italic border-l-2 border-primary pl-4">
                   {selectedArticle.summary}
                 </p>
               )}
@@ -294,17 +300,20 @@ const ArticlesSection = () => {
               </div>
 
               {selectedArticle.keywords && selectedArticle.keywords.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-border/50">
-                  {selectedArticle.keywords.map((keyword, i) => (
-                    <span key={i} className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full flex items-center gap-1">
-                      <Tag className="h-3 w-3" />
-                      {keyword}
-                    </span>
-                  ))}
+                <div className="pt-4 border-t border-border/50">
+                  <p className="text-xs text-muted-foreground mb-2">{t('articles.keywords')}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedArticle.keywords.map((keyword, i) => (
+                      <span key={i} className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full flex items-center gap-1">
+                        <Tag className="h-3 w-3" />
+                        {keyword}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              <div className="flex items-center gap-3 mt-6 pt-4 border-t border-border/50">
+              <div className="flex items-center gap-3 pt-4 border-t border-border/50">
                 <Button
                   variant="outline"
                   onClick={() => handleSave(selectedArticle.id)}
@@ -324,7 +333,7 @@ const ArticlesSection = () => {
                   {t('articles.share')}
                 </Button>
               </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>

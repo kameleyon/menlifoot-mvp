@@ -19,7 +19,7 @@ const Footer = () => {
   const footerLinks = {
     [t('footer.company')]: [
       { key: 'aboutUs', label: t('footer.aboutUs'), action: () => setAboutOpen(true) },
-      { key: 'helpCenter', label: t('footer.helpCenter'), href: '#' },
+      // { key: 'helpCenter', label: t('footer.helpCenter'), href: '#' },
       { key: 'privacyPolicy', label: t('footer.privacyPolicy'), action: () => setPrivacyOpen(true) },
       { key: 'termsOfService', label: t('footer.termsOfService'), action: () => setTermsOpen(true) },
       { key: 'cookiePolicy', label: t('footer.cookiePolicy'), action: () => setCookieOpen(true) },

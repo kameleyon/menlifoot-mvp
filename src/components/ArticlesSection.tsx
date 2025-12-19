@@ -30,8 +30,16 @@ const ArticlesSection = () => {
   const [loading, setLoading] = useState(true);
   const [savedArticles, setSavedArticles] = useState<string[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
+
+  // Map language codes to locales for date formatting
+  const localeMap: Record<string, string> = {
+    en: 'en-US',
+    fr: 'fr-FR',
+    es: 'es-ES',
+    ht: 'ht-HT'
+  };
 
   useEffect(() => {
     fetchArticles();
@@ -99,7 +107,7 @@ const ArticlesSection = () => {
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString(undefined, {
+    return new Date(dateString).toLocaleDateString(localeMap[language] || 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'

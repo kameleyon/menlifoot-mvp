@@ -13,6 +13,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Navbar
     'nav.home': 'Home',
     'nav.podcast': 'Podcast',
+    'nav.articles': 'Articles',
     'nav.askMenlifoot': 'Ask Menlifoot',
     'nav.store': 'Store',
     'nav.signIn': 'Sign In',
@@ -135,6 +136,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Navbar
     'nav.home': 'Accueil',
     'nav.podcast': 'Podcast',
+    'nav.articles': 'Articles',
     'nav.askMenlifoot': 'Demander Menlifoot',
     'nav.store': 'Boutique',
     'nav.signIn': 'Connexion',
@@ -257,6 +259,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Navbar
     'nav.home': 'Inicio',
     'nav.podcast': 'Podcast',
+    'nav.articles': 'Artículos',
     'nav.askMenlifoot': 'Preguntar Menlifoot',
     'nav.store': 'Tienda',
     'nav.signIn': 'Iniciar Sesión',
@@ -379,6 +382,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Navbar
     'nav.home': 'Lakay',
     'nav.podcast': 'Podcast',
+    'nav.articles': 'Atik yo',
     'nav.askMenlifoot': 'Mande Menlifoot',
     'nav.store': 'Boutik',
     'nav.signIn': 'Konekte',

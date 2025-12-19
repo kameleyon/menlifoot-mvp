@@ -1011,7 +1011,12 @@ const Admin = () => {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => handleSetRole(u.id, null)}
+                                onClick={() => {
+                                  if (u.id === user?.id) return;
+                                  handleSetRole(u.id, null);
+                                }}
+                                disabled={u.id === user?.id}
+                                title={u.id === user?.id ? "You can't change your own role" : undefined}
                                 className="text-xs"
                               >
                                 <ShieldOff className="h-3 w-3 mr-1" />
@@ -1022,7 +1027,12 @@ const Admin = () => {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => handleBanUser(u.id, false)}
+                                onClick={() => {
+                                  if (u.id === user?.id) return;
+                                  handleBanUser(u.id, false);
+                                }}
+                                disabled={u.id === user?.id}
+                                title={u.id === user?.id ? "You can't unban your own account" : undefined}
                                 className="text-xs text-green-500"
                               >
                                 <UserCheck className="h-3 w-3 mr-1" />
@@ -1032,7 +1042,12 @@ const Admin = () => {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => handleBanUser(u.id, true)}
+                                onClick={() => {
+                                  if (u.id === user?.id) return;
+                                  handleBanUser(u.id, true);
+                                }}
+                                disabled={u.id === user?.id}
+                                title={u.id === user?.id ? "You can't ban your own account" : undefined}
                                 className="text-xs text-yellow-500"
                               >
                                 <Ban className="h-3 w-3 mr-1" />
@@ -1042,7 +1057,12 @@ const Admin = () => {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              onClick={() => handleDeleteUser(u.id)} 
+                              onClick={() => {
+                                if (u.id === user?.id) return;
+                                handleDeleteUser(u.id);
+                              }}
+                              disabled={u.id === user?.id}
+                              title={u.id === user?.id ? "You can't delete your own account" : undefined}
                               className="text-destructive hover:text-destructive"
                             >
                               <Trash2 className="h-4 w-4" />

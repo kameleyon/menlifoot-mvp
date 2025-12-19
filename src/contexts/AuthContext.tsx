@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
+  isEditor: boolean;
   loading: boolean;
   adminLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -19,22 +20,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isEditor, setIsEditor] = useState(false);
   const [loading, setLoading] = useState(true);
   const [adminLoading, setAdminLoading] = useState(true);
 
-  const checkAdminRole = async (userId: string) => {
+  const checkUserRoles = async (userId: string) => {
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .maybeSingle();
+      .eq('user_id', userId);
     
     if (error) {
-      console.error('Error checking admin role:', error);
-      return false;
+      console.error('Error checking user roles:', error);
+      return { isAdmin: false, isEditor: false };
     }
-    return !!data;
+    
+    const roles = data?.map(r => r.role) || [];
+    return {
+      isAdmin: roles.includes('admin'),
+      isEditor: roles.includes('editor') || roles.includes('admin') // admins can also edit
+    };
   };
 
   useEffect(() => {
@@ -49,9 +54,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          const adminStatus = await checkAdminRole(session.user.id);
+          const { isAdmin: adminStatus, isEditor: editorStatus } = await checkUserRoles(session.user.id);
           if (isMounted) {
             setIsAdmin(adminStatus);
+            setIsEditor(editorStatus);
             setAdminLoading(false);
           }
         } else {
@@ -74,15 +80,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Use setTimeout to avoid Supabase deadlock
           setTimeout(async () => {
             if (isMounted) {
-              const adminStatus = await checkAdminRole(session.user.id);
+              const { isAdmin: adminStatus, isEditor: editorStatus } = await checkUserRoles(session.user.id);
               if (isMounted) {
                 setIsAdmin(adminStatus);
+                setIsEditor(editorStatus);
                 setAdminLoading(false);
               }
             }
           }, 0);
         } else {
           setIsAdmin(false);
+          setIsEditor(false);
           setAdminLoading(false);
         }
         setLoading(false);
@@ -117,10 +125,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     await supabase.auth.signOut();
     setIsAdmin(false);
+    setIsEditor(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading, adminLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, isEditor, loading, adminLoading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

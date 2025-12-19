@@ -985,73 +985,68 @@ const Admin = () => {
                             </p>
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            {/* Don't allow modifying own account */}
-                            {u.id !== user?.id && (
-                              <>
-                                {u.role !== 'admin' && (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => handleSetRole(u.id, 'admin')}
-                                    className="text-xs"
-                                  >
-                                    <Shield className="h-3 w-3 mr-1" />
-                                    Make Admin
-                                  </Button>
-                                )}
-                                {u.role !== 'editor' && u.role !== 'admin' && (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => handleSetRole(u.id, 'editor')}
-                                    className="text-xs"
-                                  >
-                                    <Edit2 className="h-3 w-3 mr-1" />
-                                    Make Editor
-                                  </Button>
-                                )}
-                                {(u.role === 'admin' || u.role === 'editor') && (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => handleSetRole(u.id, null)}
-                                    className="text-xs"
-                                  >
-                                    <ShieldOff className="h-3 w-3 mr-1" />
-                                    Remove Role
-                                  </Button>
-                                )}
-                                {u.banned_until ? (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => handleBanUser(u.id, false)}
-                                    className="text-xs text-green-500"
-                                  >
-                                    <UserCheck className="h-3 w-3 mr-1" />
-                                    Unban
-                                  </Button>
-                                ) : (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => handleBanUser(u.id, true)}
-                                    className="text-xs text-yellow-500"
-                                  >
-                                    <Ban className="h-3 w-3 mr-1" />
-                                    Ban
-                                  </Button>
-                                )}
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => handleDeleteUser(u.id)} 
-                                  className="text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </>
+                            {u.role !== 'admin' && (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleSetRole(u.id, 'admin')}
+                                className="text-xs"
+                              >
+                                <Shield className="h-3 w-3 mr-1" />
+                                Make Admin
+                              </Button>
                             )}
+                            {u.role !== 'editor' && u.role !== 'admin' && (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleSetRole(u.id, 'editor')}
+                                className="text-xs"
+                              >
+                                <Edit2 className="h-3 w-3 mr-1" />
+                                Make Editor
+                              </Button>
+                            )}
+                            {(u.role === 'admin' || u.role === 'editor') && (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleSetRole(u.id, null)}
+                                className="text-xs"
+                              >
+                                <ShieldOff className="h-3 w-3 mr-1" />
+                                Remove Role
+                              </Button>
+                            )}
+                            {u.banned_until ? (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleBanUser(u.id, false)}
+                                className="text-xs text-green-500"
+                              >
+                                <UserCheck className="h-3 w-3 mr-1" />
+                                Unban
+                              </Button>
+                            ) : (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleBanUser(u.id, true)}
+                                className="text-xs text-yellow-500"
+                              >
+                                <Ban className="h-3 w-3 mr-1" />
+                                Ban
+                              </Button>
+                            )}
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => handleDeleteUser(u.id)} 
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       ))}

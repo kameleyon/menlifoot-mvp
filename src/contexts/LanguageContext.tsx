@@ -108,6 +108,20 @@ const translations: Record<Language, Record<string, string>> = {
     // Splash
     'splash.companion': 'Your Soccer Companion',
     
+    // Articles
+    'articles.badge': 'Latest Articles',
+    'articles.title': 'Featured',
+    'articles.titleHighlight': 'Articles',
+    'articles.description': 'Expert insights, analysis, and stories from the world of football.',
+    'articles.save': 'Save',
+    'articles.share': 'Share',
+    'articles.saved': 'Saved',
+    'articles.removed': 'Removed',
+    'articles.addedToSaved': 'Article added to saved',
+    'articles.removedFromSaved': 'Article removed from saved',
+    'articles.copied': 'Copied',
+    'articles.linkCopied': 'Link copied to clipboard',
+    
     // Common
     'common.back': 'Back',
   },
@@ -209,6 +223,20 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Splash
     'splash.companion': 'Votre Compagnon Football',
+    
+    // Articles
+    'articles.badge': 'Derniers Articles',
+    'articles.title': 'Articles',
+    'articles.titleHighlight': 'Vedettes',
+    'articles.description': 'Analyses expertes, insights et histoires du monde du football.',
+    'articles.save': 'Sauvegarder',
+    'articles.share': 'Partager',
+    'articles.saved': 'Sauvegardé',
+    'articles.removed': 'Supprimé',
+    'articles.addedToSaved': 'Article ajouté aux favoris',
+    'articles.removedFromSaved': 'Article retiré des favoris',
+    'articles.copied': 'Copié',
+    'articles.linkCopied': 'Lien copié dans le presse-papiers',
     
     // Common
     'common.back': 'Retour',
@@ -312,6 +340,20 @@ const translations: Record<Language, Record<string, string>> = {
     // Splash
     'splash.companion': 'Tu Compañero de Fútbol',
     
+    // Articles
+    'articles.badge': 'Últimos Artículos',
+    'articles.title': 'Artículos',
+    'articles.titleHighlight': 'Destacados',
+    'articles.description': 'Análisis expertos, perspectivas e historias del mundo del fútbol.',
+    'articles.save': 'Guardar',
+    'articles.share': 'Compartir',
+    'articles.saved': 'Guardado',
+    'articles.removed': 'Eliminado',
+    'articles.addedToSaved': 'Artículo añadido a guardados',
+    'articles.removedFromSaved': 'Artículo eliminado de guardados',
+    'articles.copied': 'Copiado',
+    'articles.linkCopied': 'Enlace copiado al portapapeles',
+    
     // Common
     'common.back': 'Volver',
   },
@@ -413,6 +455,20 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Splash
     'splash.companion': 'Patnè Foutbòl Ou',
+    
+    // Articles
+    'articles.badge': 'Dènye Atik yo',
+    'articles.title': 'Atik',
+    'articles.titleHighlight': 'Vedèt',
+    'articles.description': 'Analiz ekspè, pèspektiv ak istwa nan mond foutbòl la.',
+    'articles.save': 'Sere',
+    'articles.share': 'Pataje',
+    'articles.saved': 'Sere',
+    'articles.removed': 'Retire',
+    'articles.addedToSaved': 'Atik ajoute nan sere yo',
+    'articles.removedFromSaved': 'Atik retire nan sere yo',
+    'articles.copied': 'Kopye',
+    'articles.linkCopied': 'Lyen kopye nan pres-papye',
     
     // Common
     'common.back': 'Retounen',

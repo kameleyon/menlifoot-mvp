@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Edit2, LogOut, ArrowLeft, Youtube, Music2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, LogOut, ArrowLeft, Youtube, Music2, FileText, Calendar, Image } from 'lucide-react';
 import menlifootBall from '@/assets/menlifoot-ball.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface Podcast {
   id: string;
@@ -36,6 +46,20 @@ interface Podcast {
   duration: string | null;
   thumbnail_url: string | null;
   published_at: string | null;
+  created_at: string;
+}
+
+interface Article {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  summary: string | null;
+  content: string;
+  category: string;
+  keywords: string[];
+  thumbnail_url: string | null;
+  published_at: string | null;
+  is_published: boolean;
   created_at: string;
 }
 
@@ -71,17 +95,64 @@ const detectPlatform = (url: string): 'spotify' | 'youtube' | null => {
   return null;
 };
 
+const ARTICLE_CATEGORIES = [
+  'Match Analysis',
+  'Transfer News',
+  'Player Spotlight',
+  'World Cup 2026',
+  'Champions League',
+  'Premier League',
+  'La Liga',
+  'Serie A',
+  'Bundesliga',
+  'Tactics',
+  'Opinion',
+];
+
+const generateKeywords = (title: string, content: string, category: string): string[] => {
+  const text = `${title} ${content} ${category}`.toLowerCase();
+  const commonWords = ['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'can', 'this', 'that', 'these', 'those', 'it', 'its'];
+  
+  const words = text.match(/\b[a-z]{4,}\b/g) || [];
+  const wordCount: Record<string, number> = {};
+  
+  words.forEach(word => {
+    if (!commonWords.includes(word)) {
+      wordCount[word] = (wordCount[word] || 0) + 1;
+    }
+  });
+  
+  return Object.entries(wordCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([word]) => word);
+};
+
 const Admin = () => {
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [isPodcastDialogOpen, setIsPodcastDialogOpen] = useState(false);
+  const [isArticleDialogOpen, setIsArticleDialogOpen] = useState(false);
   const [editingPodcast, setEditingPodcast] = useState<Podcast | null>(null);
-  const [formData, setFormData] = useState({
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [podcastFormData, setPodcastFormData] = useState({
     title: '',
     description: '',
     original_url: '',
     platform: 'spotify' as 'spotify' | 'youtube',
     episode_number: '',
     duration: '',
+  });
+  const [articleFormData, setArticleFormData] = useState({
+    title: '',
+    subtitle: '',
+    summary: '',
+    content: '',
+    category: 'Match Analysis',
+    keywords: [] as string[],
+    thumbnail_url: '',
+    published_at: null as Date | null,
+    is_published: false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -104,6 +175,7 @@ const Admin = () => {
   useEffect(() => {
     if (isAdmin) {
       fetchPodcasts();
+      fetchArticles();
     }
   }, [isAdmin]);
 
@@ -114,77 +186,116 @@ const Admin = () => {
       .order('episode_number', { ascending: false });
 
     if (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load podcasts.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to load podcasts.', variant: 'destructive' });
     } else {
       setPodcasts(data || []);
     }
   };
 
-  const handleUrlChange = (url: string) => {
-    setFormData(prev => ({ ...prev, original_url: url }));
-    const detected = detectPlatform(url);
-    if (detected) {
-      setFormData(prev => ({ ...prev, platform: detected }));
+  const fetchArticles = async () => {
+    const { data, error } = await supabase
+      .from('articles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to load articles.', variant: 'destructive' });
+    } else {
+      setArticles(data || []);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePodcastUrlChange = (url: string) => {
+    setPodcastFormData(prev => ({ ...prev, original_url: url }));
+    const detected = detectPlatform(url);
+    if (detected) {
+      setPodcastFormData(prev => ({ ...prev, platform: detected }));
+    }
+  };
+
+  const handlePodcastSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const embed_url = convertToEmbedUrl(formData.original_url, formData.platform);
+    const embed_url = convertToEmbedUrl(podcastFormData.original_url, podcastFormData.platform);
 
     const podcastData = {
-      title: formData.title,
-      description: formData.description || null,
-      platform: formData.platform,
-      original_url: formData.original_url,
+      title: podcastFormData.title,
+      description: podcastFormData.description || null,
+      platform: podcastFormData.platform,
+      original_url: podcastFormData.original_url,
       embed_url,
-      episode_number: formData.episode_number ? parseInt(formData.episode_number) : null,
-      duration: formData.duration || null,
+      episode_number: podcastFormData.episode_number ? parseInt(podcastFormData.episode_number) : null,
+      duration: podcastFormData.duration || null,
       created_by: user?.id,
     };
 
     try {
       if (editingPodcast) {
-        const { error } = await supabase
-          .from('podcasts')
-          .update(podcastData)
-          .eq('id', editingPodcast.id);
-
+        const { error } = await supabase.from('podcasts').update(podcastData).eq('id', editingPodcast.id);
         if (error) throw error;
         toast({ title: 'Success', description: 'Podcast updated!' });
       } else {
-        const { error } = await supabase
-          .from('podcasts')
-          .insert([podcastData]);
-
+        const { error } = await supabase.from('podcasts').insert([podcastData]);
         if (error) throw error;
         toast({ title: 'Success', description: 'Podcast added!' });
       }
 
-      setIsDialogOpen(false);
+      setIsPodcastDialogOpen(false);
       setEditingPodcast(null);
-      resetForm();
+      resetPodcastForm();
       fetchPodcasts();
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to save podcast.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: error.message || 'Failed to save podcast.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEdit = (podcast: Podcast) => {
+  const handleArticleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const keywords = generateKeywords(articleFormData.title, articleFormData.content, articleFormData.category);
+
+    const articleData = {
+      title: articleFormData.title,
+      subtitle: articleFormData.subtitle || null,
+      summary: articleFormData.summary || null,
+      content: articleFormData.content,
+      category: articleFormData.category,
+      keywords,
+      thumbnail_url: articleFormData.thumbnail_url || null,
+      published_at: articleFormData.published_at?.toISOString() || (articleFormData.is_published ? new Date().toISOString() : null),
+      is_published: articleFormData.is_published,
+      created_by: user?.id,
+    };
+
+    try {
+      if (editingArticle) {
+        const { error } = await supabase.from('articles').update(articleData).eq('id', editingArticle.id);
+        if (error) throw error;
+        toast({ title: 'Success', description: 'Article updated!' });
+      } else {
+        const { error } = await supabase.from('articles').insert([articleData]);
+        if (error) throw error;
+        toast({ title: 'Success', description: 'Article added!' });
+      }
+
+      setIsArticleDialogOpen(false);
+      setEditingArticle(null);
+      resetArticleForm();
+      fetchArticles();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to save article.', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditPodcast = (podcast: Podcast) => {
     setEditingPodcast(podcast);
-    setFormData({
+    setPodcastFormData({
       title: podcast.title,
       description: podcast.description || '',
       original_url: podcast.original_url,
@@ -192,37 +303,69 @@ const Admin = () => {
       episode_number: podcast.episode_number?.toString() || '',
       duration: podcast.duration || '',
     });
-    setIsDialogOpen(true);
+    setIsPodcastDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleEditArticle = (article: Article) => {
+    setEditingArticle(article);
+    setArticleFormData({
+      title: article.title,
+      subtitle: article.subtitle || '',
+      summary: article.summary || '',
+      content: article.content,
+      category: article.category,
+      keywords: article.keywords || [],
+      thumbnail_url: article.thumbnail_url || '',
+      published_at: article.published_at ? new Date(article.published_at) : null,
+      is_published: article.is_published,
+    });
+    setIsArticleDialogOpen(true);
+  };
+
+  const handleDeletePodcast = async (id: string) => {
     if (!confirm('Are you sure you want to delete this podcast?')) return;
-
-    const { error } = await supabase
-      .from('podcasts')
-      .delete()
-      .eq('id', id);
-
+    const { error } = await supabase.from('podcasts').delete().eq('id', id);
     if (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete podcast.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to delete podcast.', variant: 'destructive' });
     } else {
       toast({ title: 'Deleted', description: 'Podcast removed.' });
       fetchPodcasts();
     }
   };
 
-  const resetForm = () => {
-    setFormData({
+  const handleDeleteArticle = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this article?')) return;
+    const { error } = await supabase.from('articles').delete().eq('id', id);
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to delete article.', variant: 'destructive' });
+    } else {
+      toast({ title: 'Deleted', description: 'Article removed.' });
+      fetchArticles();
+    }
+  };
+
+  const resetPodcastForm = () => {
+    setPodcastFormData({
       title: '',
       description: '',
       original_url: '',
       platform: 'spotify',
       episode_number: '',
       duration: '',
+    });
+  };
+
+  const resetArticleForm = () => {
+    setArticleFormData({
+      title: '',
+      subtitle: '',
+      summary: '',
+      content: '',
+      category: 'Match Analysis',
+      keywords: [],
+      thumbnail_url: '',
+      published_at: null,
+      is_published: false,
     });
   };
 
@@ -267,7 +410,6 @@ const Admin = () => {
                 <span className="hidden sm:inline">Back</span>
               </Button>
               
-              {/* Animated Logo */}
               <motion.img 
                 src={menlifootBall} 
                 alt="Menlifoot" 
@@ -283,7 +425,6 @@ const Admin = () => {
               </h1>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
-              {/* Profile Avatar */}
               <div className="w-8 h-8 rounded-full bg-gradient-gold flex items-center justify-center flex-shrink-0">
                 <span className="text-sm font-bold text-primary-foreground uppercase">
                   {user?.email?.charAt(0) || 'A'}
@@ -296,196 +437,324 @@ const Admin = () => {
             </div>
           </div>
 
-          {/* Add Podcast Button */}
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) {
-              setEditingPodcast(null);
-              resetForm();
-            }
-          }}>
-            <DialogTrigger asChild>
-              <Button variant="gold" className="mb-6">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Podcast Episode
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingPodcast ? 'Edit Podcast' : 'Add New Podcast'}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Episode Title *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Episode title"
-                    required
-                  />
-                </div>
+          {/* Tabs */}
+          <Tabs defaultValue="podcasts" className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="podcasts" className="flex items-center gap-2">
+                <Music2 className="h-4 w-4" />
+                Podcasts
+              </TabsTrigger>
+              <TabsTrigger value="articles" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Articles
+              </TabsTrigger>
+            </TabsList>
 
-                <div className="space-y-2">
-                  <Label htmlFor="original_url">Podcast URL *</Label>
-                  <Input
-                    id="original_url"
-                    value={formData.original_url}
-                    onChange={(e) => handleUrlChange(e.target.value)}
-                    placeholder="Paste Spotify or YouTube link"
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Platform will be auto-detected from the URL
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="platform">Platform</Label>
-                  <Select
-                    value={formData.platform}
-                    onValueChange={(value: 'spotify' | 'youtube') => 
-                      setFormData(prev => ({ ...prev, platform: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select platform" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="spotify">
-                        <div className="flex items-center gap-2">
-                          <Music2 className="h-4 w-4" />
-                          Spotify
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="youtube">
-                        <div className="flex items-center gap-2">
-                          <Youtube className="h-4 w-4" />
-                          YouTube
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="episode_number">Episode #</Label>
-                    <Input
-                      id="episode_number"
-                      type="number"
-                      value={formData.episode_number}
-                      onChange={(e) => setFormData(prev => ({ ...prev, episode_number: e.target.value }))}
-                      placeholder="1"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="duration">Duration</Label>
-                    <Input
-                      id="duration"
-                      value={formData.duration}
-                      onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
-                      placeholder="45:30"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Episode description..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                    className="flex-1"
-                  >
-                    Cancel
+            {/* Podcasts Tab */}
+            <TabsContent value="podcasts">
+              <Dialog open={isPodcastDialogOpen} onOpenChange={(open) => {
+                setIsPodcastDialogOpen(open);
+                if (!open) { setEditingPodcast(null); resetPodcastForm(); }
+              }}>
+                <DialogTrigger asChild>
+                  <Button variant="gold" className="mb-6">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Podcast Episode
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="gold"
-                    disabled={isLoading}
-                    className="flex-1"
-                  >
-                    {isLoading ? 'Saving...' : editingPodcast ? 'Update' : 'Add Podcast'}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          {/* Podcasts List */}
-          <div className="glass-card p-6">
-            <h2 className="text-xl font-display font-semibold mb-4">
-              Podcast Episodes ({podcasts.length})
-            </h2>
-            
-            {podcasts.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                No podcasts yet. Add your first episode!
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {podcasts.map((podcast) => (
-                  <div
-                    key={podcast.id}
-                    className="flex items-center gap-4 p-4 bg-surface rounded-lg border border-border/50"
-                  >
-                    <div className="w-12 h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
-                      {podcast.platform === 'youtube' ? (
-                        <Youtube className="h-6 w-6 text-primary-foreground" />
-                      ) : (
-                        <Music2 className="h-6 w-6 text-primary-foreground" />
-                      )}
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>{editingPodcast ? 'Edit Podcast' : 'Add New Podcast'}</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handlePodcastSubmit} className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="podcast-title">Episode Title *</Label>
+                      <Input
+                        id="podcast-title"
+                        value={podcastFormData.title}
+                        onChange={(e) => setPodcastFormData(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="Episode title"
+                        required
+                      />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        {podcast.episode_number && (
-                          <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded">
-                            EP {podcast.episode_number}
-                          </span>
-                        )}
-                        <h3 className="font-medium text-foreground truncate">
-                          {podcast.title}
-                        </h3>
+                    <div className="space-y-2">
+                      <Label htmlFor="podcast-url">Podcast URL *</Label>
+                      <Input
+                        id="podcast-url"
+                        value={podcastFormData.original_url}
+                        onChange={(e) => handlePodcastUrlChange(e.target.value)}
+                        placeholder="Paste Spotify or YouTube link"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Platform</Label>
+                      <Select
+                        value={podcastFormData.platform}
+                        onValueChange={(value: 'spotify' | 'youtube') => 
+                          setPodcastFormData(prev => ({ ...prev, platform: value }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select platform" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="spotify"><div className="flex items-center gap-2"><Music2 className="h-4 w-4" /> Spotify</div></SelectItem>
+                          <SelectItem value="youtube"><div className="flex items-center gap-2"><Youtube className="h-4 w-4" /> YouTube</div></SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="episode-number">Episode #</Label>
+                        <Input
+                          id="episode-number"
+                          type="number"
+                          value={podcastFormData.episode_number}
+                          onChange={(e) => setPodcastFormData(prev => ({ ...prev, episode_number: e.target.value }))}
+                          placeholder="1"
+                        />
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {podcast.platform} • {podcast.duration || 'No duration'}
-                      </p>
+                      <div className="space-y-2">
+                        <Label htmlFor="duration">Duration</Label>
+                        <Input
+                          id="duration"
+                          value={podcastFormData.duration}
+                          onChange={(e) => setPodcastFormData(prev => ({ ...prev, duration: e.target.value }))}
+                          placeholder="45:30"
+                        />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(podcast)}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(podcast.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
+                    <div className="space-y-2">
+                      <Label htmlFor="podcast-description">Description</Label>
+                      <Textarea
+                        id="podcast-description"
+                        value={podcastFormData.description}
+                        onChange={(e) => setPodcastFormData(prev => ({ ...prev, description: e.target.value }))}
+                        placeholder="Episode description..."
+                        rows={3}
+                      />
+                    </div>
+                    <div className="flex gap-3 pt-4">
+                      <Button type="button" variant="outline" onClick={() => setIsPodcastDialogOpen(false)} className="flex-1">Cancel</Button>
+                      <Button type="submit" variant="gold" disabled={isLoading} className="flex-1">
+                        {isLoading ? 'Saving...' : editingPodcast ? 'Update' : 'Add Podcast'}
                       </Button>
                     </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              <div className="glass-card p-6">
+                <h2 className="text-xl font-display font-semibold mb-4">Podcast Episodes ({podcasts.length})</h2>
+                {podcasts.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No podcasts yet. Add your first episode!</p>
+                ) : (
+                  <div className="space-y-4">
+                    {podcasts.map((podcast) => (
+                      <div key={podcast.id} className="flex items-center gap-4 p-4 bg-surface rounded-lg border border-border/50">
+                        <div className="w-12 h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
+                          {podcast.platform === 'youtube' ? <Youtube className="h-6 w-6 text-primary-foreground" /> : <Music2 className="h-6 w-6 text-primary-foreground" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            {podcast.episode_number && <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded">EP {podcast.episode_number}</span>}
+                            <h3 className="font-medium text-foreground truncate">{podcast.title}</h3>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{podcast.platform} • {podcast.duration || 'No duration'}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleEditPodcast(podcast)}><Edit2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeletePodcast(podcast.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
+            </TabsContent>
+
+            {/* Articles Tab */}
+            <TabsContent value="articles">
+              <Dialog open={isArticleDialogOpen} onOpenChange={(open) => {
+                setIsArticleDialogOpen(open);
+                if (!open) { setEditingArticle(null); resetArticleForm(); }
+              }}>
+                <DialogTrigger asChild>
+                  <Button variant="gold" className="mb-6">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Article
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>{editingArticle ? 'Edit Article' : 'Add New Article'}</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleArticleSubmit} className="space-y-4 mt-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2 col-span-2">
+                        <Label htmlFor="article-title">Title *</Label>
+                        <Input
+                          id="article-title"
+                          value={articleFormData.title}
+                          onChange={(e) => setArticleFormData(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="Article title"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <Label htmlFor="article-subtitle">Subtitle</Label>
+                        <Input
+                          id="article-subtitle"
+                          value={articleFormData.subtitle}
+                          onChange={(e) => setArticleFormData(prev => ({ ...prev, subtitle: e.target.value }))}
+                          placeholder="Article subtitle"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Category *</Label>
+                        <Select
+                          value={articleFormData.category}
+                          onValueChange={(value) => setArticleFormData(prev => ({ ...prev, category: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {ARTICLE_CATEGORIES.map((cat) => (
+                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Publish Date</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !articleFormData.published_at && "text-muted-foreground")}>
+                              <Calendar className="mr-2 h-4 w-4" />
+                              {articleFormData.published_at ? format(articleFormData.published_at, "PPP") : "Pick a date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={articleFormData.published_at || undefined}
+                              onSelect={(date) => setArticleFormData(prev => ({ ...prev, published_at: date || null }))}
+                              initialFocus
+                              className="p-3 pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="article-thumbnail">Thumbnail URL</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="article-thumbnail"
+                          value={articleFormData.thumbnail_url}
+                          onChange={(e) => setArticleFormData(prev => ({ ...prev, thumbnail_url: e.target.value }))}
+                          placeholder="https://example.com/image.jpg"
+                          className="flex-1"
+                        />
+                        <Button type="button" variant="outline" size="icon">
+                          <Image className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="article-summary">Summary</Label>
+                      <Textarea
+                        id="article-summary"
+                        value={articleFormData.summary}
+                        onChange={(e) => setArticleFormData(prev => ({ ...prev, summary: e.target.value }))}
+                        placeholder="Brief summary of the article..."
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="article-content">Content *</Label>
+                      <Textarea
+                        id="article-content"
+                        value={articleFormData.content}
+                        onChange={(e) => setArticleFormData(prev => ({ ...prev, content: e.target.value }))}
+                        placeholder="Write your article content here..."
+                        rows={8}
+                        required
+                      />
+                      <p className="text-xs text-muted-foreground">Keywords will be auto-generated from the content</p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id="is-published"
+                          checked={articleFormData.is_published}
+                          onCheckedChange={(checked) => setArticleFormData(prev => ({ ...prev, is_published: checked }))}
+                        />
+                        <Label htmlFor="is-published">Publish immediately</Label>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                      <Button type="button" variant="outline" onClick={() => setIsArticleDialogOpen(false)} className="flex-1">Cancel</Button>
+                      <Button type="submit" variant="gold" disabled={isLoading} className="flex-1">
+                        {isLoading ? 'Saving...' : editingArticle ? 'Update' : 'Add Article'}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              <div className="glass-card p-6">
+                <h2 className="text-xl font-display font-semibold mb-4">Articles ({articles.length})</h2>
+                {articles.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No articles yet. Add your first article!</p>
+                ) : (
+                  <div className="space-y-4">
+                    {articles.map((article) => (
+                      <div key={article.id} className="flex items-center gap-4 p-4 bg-surface rounded-lg border border-border/50">
+                        {article.thumbnail_url ? (
+                          <div className="w-16 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                            <img src={article.thumbnail_url} alt={article.title} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-16 h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
+                            <FileText className="h-6 w-6 text-primary-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded">{article.category}</span>
+                            {article.is_published ? (
+                              <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-500 rounded">Published</span>
+                            ) : (
+                              <span className="text-xs px-2 py-0.5 bg-yellow-500/20 text-yellow-500 rounded">Draft</span>
+                            )}
+                          </div>
+                          <h3 className="font-medium text-foreground truncate">{article.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {article.published_at ? format(new Date(article.published_at), 'MMM d, yyyy') : 'No date set'}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleEditArticle(article)}><Edit2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteArticle(article.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </motion.div>
       </div>
     </div>

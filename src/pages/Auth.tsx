@@ -80,7 +80,7 @@ const Auth = () => {
         } else {
           toast({
             title: 'Account Created!',
-            description: 'You can now log in with your credentials.',
+            description: 'Your account is pending admin approval. You will be notified once approved.',
           });
           setIsLogin(true);
         }

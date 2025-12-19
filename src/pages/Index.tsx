@@ -1,8 +1,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
-// import NewsSection from "@/components/NewsSection";
-// import SocialMediaSection from "@/components/SocialMediaSection";
+import ArticlesSection from "@/components/ArticlesSection";
 import ChatSection from "@/components/ChatSection";
 import MerchSection from "@/components/MerchSection";
 import AIAgent from "@/components/AIAgent";
@@ -23,9 +22,8 @@ const Index = () => {
             <Navbar />
             <main>
               <HeroSection />
-              {/* <NewsSection /> */}
-              {/* <SocialMediaSection /> */}
               <ChatSection />
+              <ArticlesSection />
               <MerchSection />
             </main>
             <Footer />

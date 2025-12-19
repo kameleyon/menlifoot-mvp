@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Edit2, LogOut, ArrowLeft, Youtube, Music2, FileText, Calendar, Image } from 'lucide-react';
+import { Plus, Trash2, Edit2, LogOut, ArrowLeft, Youtube, Music2, FileText, Calendar, Image, Users, Shield, ShieldOff, Ban, UserCheck } from 'lucide-react';
 import menlifootBall from '@/assets/menlifoot-ball.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,6 +62,14 @@ interface Article {
   is_published: boolean;
   original_language: string;
   created_at: string;
+}
+
+interface UserWithRole {
+  id: string;
+  email: string;
+  created_at: string;
+  role: 'admin' | 'editor' | 'user' | null;
+  banned_until: string | null;
 }
 
 const LANGUAGES = [
@@ -139,6 +147,7 @@ const generateKeywords = (title: string, content: string, category: string): str
 const Admin = () => {
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
+  const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isPodcastDialogOpen, setIsPodcastDialogOpen] = useState(false);
   const [isArticleDialogOpen, setIsArticleDialogOpen] = useState(false);
   const [editingPodcast, setEditingPodcast] = useState<Podcast | null>(null);
@@ -165,29 +174,36 @@ const Admin = () => {
   });
   const [uploadingImage, setUploadingImage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [usersLoading, setUsersLoading] = useState(false);
   const { toast } = useToast();
-  const { user, isAdmin, loading, adminLoading, signOut } = useAuth();
+  const { user, isAdmin, isEditor, loading, adminLoading, signOut } = useAuth();
   const navigate = useNavigate();
+
+  // Check if user can access admin panel (admin or editor)
+  const canAccessPanel = isAdmin || isEditor;
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
-    } else if (!loading && !adminLoading && user && !isAdmin) {
+    } else if (!loading && !adminLoading && user && !canAccessPanel) {
       toast({
         title: 'Access Denied',
-        description: 'You do not have admin privileges.',
+        description: 'You do not have admin or editor privileges.',
         variant: 'destructive',
       });
       navigate('/');
     }
-  }, [user, isAdmin, loading, adminLoading, navigate, toast]);
+  }, [user, canAccessPanel, loading, adminLoading, navigate, toast]);
 
   useEffect(() => {
-    if (isAdmin) {
+    if (canAccessPanel) {
       fetchPodcasts();
       fetchArticles();
+      if (isAdmin) {
+        fetchUsers();
+      }
     }
-  }, [isAdmin]);
+  }, [canAccessPanel, isAdmin]);
 
   const fetchPodcasts = async () => {
     const { data, error } = await supabase
@@ -212,6 +228,68 @@ const Admin = () => {
       toast({ title: 'Error', description: 'Failed to load articles.', variant: 'destructive' });
     } else {
       setArticles(data || []);
+    }
+  };
+
+  const fetchUsers = async () => {
+    setUsersLoading(true);
+    try {
+      // Fetch users via edge function (since we can't access auth.users directly)
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        body: { action: 'list' }
+      });
+
+      if (error) throw error;
+      setUsers(data?.users || []);
+    } catch (error: any) {
+      console.error('Error fetching users:', error);
+      toast({ title: 'Error', description: 'Failed to load users.', variant: 'destructive' });
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  const handleSetRole = async (userId: string, role: 'admin' | 'editor' | null) => {
+    try {
+      const { error } = await supabase.functions.invoke('manage-users', {
+        body: { action: 'setRole', userId, role }
+      });
+
+      if (error) throw error;
+      toast({ title: 'Success', description: role ? `User set as ${role}.` : 'Role removed.' });
+      fetchUsers();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to update role.', variant: 'destructive' });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    
+    try {
+      const { error } = await supabase.functions.invoke('manage-users', {
+        body: { action: 'delete', userId }
+      });
+
+      if (error) throw error;
+      toast({ title: 'Success', description: 'User deleted.' });
+      fetchUsers();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to delete user.', variant: 'destructive' });
+    }
+  };
+
+  const handleBanUser = async (userId: string, ban: boolean) => {
+    try {
+      const { error } = await supabase.functions.invoke('manage-users', {
+        body: { action: ban ? 'ban' : 'unban', userId }
+      });
+
+      if (error) throw error;
+      toast({ title: 'Success', description: ban ? 'User banned.' : 'User unbanned.' });
+      fetchUsers();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to update user.', variant: 'destructive' });
     }
   };
 
@@ -437,7 +515,7 @@ const Admin = () => {
     );
   }
 
-  if (!isAdmin) {
+  if (!canAccessPanel) {
     return null;
   }
 
@@ -497,12 +575,18 @@ const Admin = () => {
             <TabsList className="mb-6">
               <TabsTrigger value="podcasts" className="flex items-center gap-2">
                 <Music2 className="h-4 w-4" />
-                Podcasts
+                <span className="hidden sm:inline">Podcasts</span>
               </TabsTrigger>
               <TabsTrigger value="articles" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                Articles
+                <span className="hidden sm:inline">Articles</span>
               </TabsTrigger>
+              {isAdmin && (
+                <TabsTrigger value="users" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Users</span>
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {/* Podcasts Tab */}
@@ -858,6 +942,124 @@ const Admin = () => {
                 )}
               </div>
             </TabsContent>
+
+            {/* Users Tab - Admin Only */}
+            {isAdmin && (
+              <TabsContent value="users">
+                <div className="glass-card p-6">
+                  <h2 className="text-xl font-display font-semibold mb-4">User Management ({users.length})</h2>
+                  {usersLoading ? (
+                    <p className="text-muted-foreground text-center py-8">Loading users...</p>
+                  ) : users.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No users found.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {users.map((u) => (
+                        <div key={u.id} className="flex items-center gap-4 p-4 bg-surface rounded-lg border border-border/50">
+                          <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center flex-shrink-0">
+                            <span className="text-sm font-bold text-primary-foreground uppercase">
+                              {u.email?.charAt(0) || '?'}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h3 className="font-medium text-foreground truncate">{u.email}</h3>
+                              {u.role === 'admin' && (
+                                <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded flex items-center gap-1">
+                                  <Shield className="h-3 w-3" /> Admin
+                                </span>
+                              )}
+                              {u.role === 'editor' && (
+                                <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded flex items-center gap-1">
+                                  <Edit2 className="h-3 w-3" /> Editor
+                                </span>
+                              )}
+                              {u.banned_until && (
+                                <span className="text-xs px-2 py-0.5 bg-destructive/20 text-destructive rounded flex items-center gap-1">
+                                  <Ban className="h-3 w-3" /> Banned
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Joined {format(new Date(u.created_at), 'MMM d, yyyy')}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {/* Don't allow modifying own account */}
+                            {u.id !== user?.id && (
+                              <>
+                                {u.role !== 'admin' && (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleSetRole(u.id, 'admin')}
+                                    className="text-xs"
+                                  >
+                                    <Shield className="h-3 w-3 mr-1" />
+                                    Make Admin
+                                  </Button>
+                                )}
+                                {u.role !== 'editor' && u.role !== 'admin' && (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleSetRole(u.id, 'editor')}
+                                    className="text-xs"
+                                  >
+                                    <Edit2 className="h-3 w-3 mr-1" />
+                                    Make Editor
+                                  </Button>
+                                )}
+                                {(u.role === 'admin' || u.role === 'editor') && (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleSetRole(u.id, null)}
+                                    className="text-xs"
+                                  >
+                                    <ShieldOff className="h-3 w-3 mr-1" />
+                                    Remove Role
+                                  </Button>
+                                )}
+                                {u.banned_until ? (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleBanUser(u.id, false)}
+                                    className="text-xs text-green-500"
+                                  >
+                                    <UserCheck className="h-3 w-3 mr-1" />
+                                    Unban
+                                  </Button>
+                                ) : (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleBanUser(u.id, true)}
+                                    className="text-xs text-yellow-500"
+                                  >
+                                    <Ban className="h-3 w-3 mr-1" />
+                                    Ban
+                                  </Button>
+                                )}
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => handleDeleteUser(u.id)} 
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            )}
           </Tabs>
         </motion.div>
       </div>

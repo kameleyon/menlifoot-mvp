@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Newspaper, Calendar, Share2, Bookmark, BookmarkCheck, ExternalLink, Tag } from "lucide-react";
+import { Newspaper, Calendar, Share2, Bookmark, BookmarkCheck, Tag, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,14 +22,21 @@ interface Article {
   keywords: string[];
   thumbnail_url: string | null;
   published_at: string | null;
+  original_language: string;
   created_at: string;
+}
+
+interface TranslatedArticle extends Article {
+  translated?: boolean;
 }
 
 const ArticlesSection = () => {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [translatedArticles, setTranslatedArticles] = useState<TranslatedArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [translating, setTranslating] = useState(false);
   const [savedArticles, setSavedArticles] = useState<string[]>([]);
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<TranslatedArticle | null>(null);
   const { t, language } = useLanguage();
   const { toast } = useToast();
 
@@ -41,6 +48,57 @@ const ArticlesSection = () => {
     ht: 'ht-HT'
   };
 
+  const translateArticle = useCallback(async (article: Article, targetLanguage: string): Promise<TranslatedArticle> => {
+    // If article is already in target language, return as-is
+    if (article.original_language === targetLanguage) {
+      return { ...article, translated: false };
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-article', {
+        body: {
+          title: article.title,
+          subtitle: article.subtitle,
+          summary: article.summary,
+          content: article.content,
+          keywords: article.keywords,
+          fromLanguage: article.original_language,
+          toLanguage: targetLanguage
+        }
+      });
+
+      if (error) throw error;
+
+      return {
+        ...article,
+        title: data.title || article.title,
+        subtitle: data.subtitle || article.subtitle,
+        summary: data.summary || article.summary,
+        content: data.content || article.content,
+        keywords: data.keywords || article.keywords,
+        translated: true
+      };
+    } catch (error) {
+      console.error('Translation error:', error);
+      return { ...article, translated: false };
+    }
+  }, []);
+
+  const translateAllArticles = useCallback(async (articlesToTranslate: Article[], targetLanguage: string) => {
+    setTranslating(true);
+    try {
+      const translated = await Promise.all(
+        articlesToTranslate.map(article => translateArticle(article, targetLanguage))
+      );
+      setTranslatedArticles(translated);
+    } catch (error) {
+      console.error('Translation batch error:', error);
+      setTranslatedArticles(articlesToTranslate.map(a => ({ ...a, translated: false })));
+    } finally {
+      setTranslating(false);
+    }
+  }, [translateArticle]);
+
   useEffect(() => {
     fetchArticles();
     // Load saved articles from localStorage
@@ -49,6 +107,13 @@ const ArticlesSection = () => {
       setSavedArticles(JSON.parse(saved));
     }
   }, []);
+
+  // Translate articles when language changes
+  useEffect(() => {
+    if (articles.length > 0) {
+      translateAllArticles(articles, language);
+    }
+  }, [language, articles, translateAllArticles]);
 
   const fetchArticles = async () => {
     try {
@@ -60,7 +125,11 @@ const ArticlesSection = () => {
         .limit(6);
 
       if (error) throw error;
-      setArticles(data || []);
+      const fetchedArticles = (data || []).map(article => ({
+        ...article,
+        original_language: article.original_language || 'en'
+      }));
+      setArticles(fetchedArticles);
     } catch (error) {
       console.error('Error fetching articles:', error);
     } finally {
@@ -81,7 +150,7 @@ const ArticlesSection = () => {
     localStorage.setItem('savedArticles', JSON.stringify(newSaved));
   };
 
-  const handleShare = async (article: Article) => {
+  const handleShare = async (article: TranslatedArticle) => {
     const shareData = {
       title: article.title,
       text: article.summary || article.title,
@@ -130,6 +199,8 @@ const ArticlesSection = () => {
     return null;
   }
 
+  const displayArticles = translatedArticles.length > 0 ? translatedArticles : articles.map(a => ({ ...a, translated: false }));
+
   return (
     <section id="articles" className="py-20 md:py-32 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
@@ -153,11 +224,17 @@ const ArticlesSection = () => {
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             {t('articles.description')}
           </p>
+          {translating && (
+            <div className="flex items-center justify-center gap-2 mt-4 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">{t('articles.translating')}</span>
+            </div>
+          )}
         </motion.div>
 
         {/* Articles Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {articles.map((article, index) => (
+          {displayArticles.map((article, index) => (
             <motion.article
               key={article.id}
               initial={{ opacity: 0, y: 30 }}

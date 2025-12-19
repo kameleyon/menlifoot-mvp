@@ -19,7 +19,7 @@ const CookiePolicyDialog = ({ open, onOpenChange }: CookiePolicyDialogProps) => 
           <DialogTitle className="text-2xl font-display">Cookie Policy</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[70vh] px-6 pb-6">
-          <div className="prose prose-sm dark:prose-invert max-w-none space-y-6 text-muted-foreground">
+          <div className="prose prose-sm dark:prose-invert max-w-none space-y-6 text-muted-foreground [&_strong]:text-primary [&_li_strong]:text-primary">
             <p className="text-sm italic">
               Effective Date: December 2024<br />
               Last Updated: December 2024

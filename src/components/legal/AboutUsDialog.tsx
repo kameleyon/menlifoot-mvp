@@ -19,7 +19,7 @@ const AboutUsDialog = ({ open, onOpenChange }: AboutUsDialogProps) => {
           <DialogTitle className="text-2xl font-display">About Menlifoot</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[70vh] px-6 pb-6">
-          <div className="prose prose-sm dark:prose-invert max-w-none space-y-6 text-muted-foreground">
+          <div className="prose prose-sm dark:prose-invert max-w-none space-y-6 text-muted-foreground [&_strong]:text-primary [&_li_strong]:text-primary">
             <section>
               <h3 className="text-lg font-semibold text-foreground">Our Mission</h3>
               <p>

@@ -39,7 +39,7 @@ const Podcasts = () => {
     const { data, error } = await supabase
       .from('podcasts')
       .select('*')
-      .order('episode_number', { ascending: false });
+      .order('published_at', { ascending: false });
 
     if (!error && data) {
       setPodcasts(data);

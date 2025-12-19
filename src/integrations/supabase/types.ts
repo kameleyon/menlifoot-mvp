@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       articles: {
         Row: {
+          author: string | null
           category: string
           content: string
           created_at: string
@@ -30,8 +31,10 @@ export type Database = {
           thumbnail_url: string | null
           title: string
           updated_at: string
+          view_count: number | null
         }
         Insert: {
+          author?: string | null
           category: string
           content: string
           created_at?: string
@@ -46,8 +49,10 @@ export type Database = {
           thumbnail_url?: string | null
           title: string
           updated_at?: string
+          view_count?: number | null
         }
         Update: {
+          author?: string | null
           category?: string
           content?: string
           created_at?: string
@@ -62,6 +67,7 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
+          view_count?: number | null
         }
         Relationships: []
       }

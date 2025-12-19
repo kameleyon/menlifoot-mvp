@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Newspaper, Calendar, Share2, Bookmark, BookmarkCheck, Tag, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,9 @@ interface TranslatedArticle extends Article {
   translated?: boolean;
 }
 
+// Cache for translated articles
+const translationCache: Map<string, TranslatedArticle> = new Map();
+
 const ArticlesSection = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [translatedArticles, setTranslatedArticles] = useState<TranslatedArticle[]>([]);
@@ -39,6 +42,7 @@ const ArticlesSection = () => {
   const [selectedArticle, setSelectedArticle] = useState<TranslatedArticle | null>(null);
   const { t, language } = useLanguage();
   const { toast } = useToast();
+  const translationInProgress = useRef(false);
 
   // Map language codes to locales for date formatting
   const localeMap: Record<string, string> = {
@@ -48,10 +52,19 @@ const ArticlesSection = () => {
     ht: 'ht-HT'
   };
 
+  const getCacheKey = (articleId: string, targetLang: string) => `${articleId}_${targetLang}`;
+
   const translateArticle = useCallback(async (article: Article, targetLanguage: string): Promise<TranslatedArticle> => {
     // If article is already in target language, return as-is
     if (article.original_language === targetLanguage) {
       return { ...article, translated: false };
+    }
+
+    // Check cache first
+    const cacheKey = getCacheKey(article.id, targetLanguage);
+    const cached = translationCache.get(cacheKey);
+    if (cached) {
+      return cached;
     }
 
     try {
@@ -69,7 +82,7 @@ const ArticlesSection = () => {
 
       if (error) throw error;
 
-      return {
+      const translated: TranslatedArticle = {
         ...article,
         title: data.title || article.title,
         subtitle: data.subtitle || article.subtitle,
@@ -78,6 +91,10 @@ const ArticlesSection = () => {
         keywords: data.keywords || article.keywords,
         translated: true
       };
+
+      // Cache the result
+      translationCache.set(cacheKey, translated);
+      return translated;
     } catch (error) {
       console.error('Translation error:', error);
       return { ...article, translated: false };
@@ -85,7 +102,19 @@ const ArticlesSection = () => {
   }, []);
 
   const translateAllArticles = useCallback(async (articlesToTranslate: Article[], targetLanguage: string) => {
-    setTranslating(true);
+    if (translationInProgress.current) return;
+    translationInProgress.current = true;
+    
+    // Check if any article needs translation
+    const needsTranslation = articlesToTranslate.some(
+      article => article.original_language !== targetLanguage && 
+                 !translationCache.has(getCacheKey(article.id, targetLanguage))
+    );
+
+    if (needsTranslation) {
+      setTranslating(true);
+    }
+
     try {
       const translated = await Promise.all(
         articlesToTranslate.map(article => translateArticle(article, targetLanguage))
@@ -96,6 +125,7 @@ const ArticlesSection = () => {
       setTranslatedArticles(articlesToTranslate.map(a => ({ ...a, translated: false })));
     } finally {
       setTranslating(false);
+      translationInProgress.current = false;
     }
   }, [translateArticle]);
 
@@ -166,7 +196,6 @@ const ArticlesSection = () => {
         toast({ title: t('articles.copied'), description: t('articles.linkCopied') });
       }
     } catch (error) {
-      // User cancelled or share failed - only show error for clipboard failures
       if (!navigator.share) {
         console.error('Error sharing:', error);
         toast({ title: t('articles.shareError'), description: t('articles.shareErrorDesc'), variant: 'destructive' });
@@ -340,7 +369,6 @@ const ArticlesSection = () => {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-background">
           {selectedArticle && (
             <div className="space-y-4">
-              {/* Image at the top, separate from content */}
               {selectedArticle.thumbnail_url && (
                 <div className="aspect-video overflow-hidden rounded-lg -mx-6 -mt-6">
                   <img

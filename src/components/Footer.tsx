@@ -74,7 +74,7 @@ const Footer = () => {
                 {t('footer.tagline')}
               </p>
               
-              {/* Newsletter */}
+              {/* Newsletter - Temporarily disabled
               <div className="flex gap-2">
                 <input
                   type="email"
@@ -85,6 +85,7 @@ const Footer = () => {
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
+              */}
             </div>
 
             {/* Links */}

@@ -263,25 +263,27 @@ const ArticlesSection = () => {
   const handleShare = async (article: TranslatedArticle) => {
     const siteUrl = window.location.origin;
     const shareUrl = `${siteUrl}/#articles`;
-    const shareText = `${article.title}${article.summary ? ' - ' + article.summary : ''}`;
-    
-    const shareData = {
-      title: article.title,
-      text: shareText,
-      url: shareUrl,
-    };
+    const shareTextWithUrl = `${article.title} - ${shareUrl}`;
 
+    // Always try clipboard first as it's more reliable
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(`${article.title} - ${shareUrl}`);
-        toast({ title: t('articles.copied'), description: t('articles.linkCopied') });
-      }
+      await navigator.clipboard.writeText(shareTextWithUrl);
+      toast({ title: t('articles.copied'), description: t('articles.linkCopied') });
     } catch (error) {
-      // User cancelled share - not an error
-      if ((error as Error).name !== 'AbortError') {
-        console.error('Error sharing:', error);
+      // Clipboard failed, try Web Share API as fallback
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: article.title,
+            text: article.summary || article.title,
+            url: shareUrl,
+          });
+        } catch (shareError) {
+          if ((shareError as Error).name !== 'AbortError') {
+            console.error('Error sharing:', shareError);
+          }
+        }
+      } else {
         toast({ title: t('articles.shareError'), description: t('articles.shareErrorDesc'), variant: 'destructive' });
       }
     }

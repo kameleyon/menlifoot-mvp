@@ -261,22 +261,26 @@ const ArticlesSection = () => {
   };
 
   const handleShare = async (article: TranslatedArticle) => {
+    const siteUrl = window.location.origin;
+    const shareUrl = `${siteUrl}/#articles`;
+    const shareText = `${article.title}${article.summary ? ' - ' + article.summary : ''}`;
+    
     const shareData = {
       title: article.title,
-      text: article.summary || article.title,
-      url: window.location.href,
+      text: shareText,
+      url: shareUrl,
     };
 
     try {
       if (navigator.share) {
         await navigator.share(shareData);
-        toast({ title: t('articles.shared'), description: t('articles.sharedSuccess') });
       } else {
-        await navigator.clipboard.writeText(`${article.title} - ${window.location.href}`);
+        await navigator.clipboard.writeText(`${article.title} - ${shareUrl}`);
         toast({ title: t('articles.copied'), description: t('articles.linkCopied') });
       }
     } catch (error) {
-      if (!navigator.share) {
+      // User cancelled share - not an error
+      if ((error as Error).name !== 'AbortError') {
         console.error('Error sharing:', error);
         toast({ title: t('articles.shareError'), description: t('articles.shareErrorDesc'), variant: 'destructive' });
       }

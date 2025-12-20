@@ -1,3 +1,4 @@
+// Language context for multi-language support
 import { createContext, useContext, useState, ReactNode } from 'react';
 
 export type Language = 'en' | 'fr' | 'es' | 'ht';

@@ -363,7 +363,7 @@ const ArticlesSection = () => {
                 className="gap-2"
               >
                 <Filter className="h-4 w-4" />
-                Filters
+                {t('articles.filters')}
                 {activeFiltersCount > 0 && (
                   <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary-foreground text-primary rounded-full">
                     {activeFiltersCount}
@@ -379,7 +379,7 @@ const ArticlesSection = () => {
                   className="text-muted-foreground hover:text-foreground gap-1"
                 >
                   <X className="h-3 w-3" />
-                  Clear all
+                  {t('articles.clearAll')}
                 </Button>
               )}
             </div>
@@ -391,22 +391,22 @@ const ArticlesSection = () => {
                   {sortBy === 'latest' && <Clock className="h-4 w-4" />}
                   {sortBy === 'oldest' && <Calendar className="h-4 w-4" />}
                   {sortBy === 'popular' && <TrendingUp className="h-4 w-4" />}
-                  {sortBy === 'latest' ? 'Latest' : sortBy === 'oldest' ? 'Oldest' : 'Popular'}
+                  {sortBy === 'latest' ? t('articles.latest') : sortBy === 'oldest' ? t('articles.oldest') : t('articles.popular')}
                   <ChevronDown className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-background border border-border z-50">
                 <DropdownMenuItem onClick={() => setSortBy('latest')} className="gap-2 cursor-pointer">
                   <Clock className="h-4 w-4" />
-                  Latest First
+                  {t('articles.latestFirst')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSortBy('oldest')} className="gap-2 cursor-pointer">
                   <Calendar className="h-4 w-4" />
-                  Oldest First
+                  {t('articles.oldestFirst')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSortBy('popular')} className="gap-2 cursor-pointer">
                   <TrendingUp className="h-4 w-4" />
-                  Most Popular
+                  {t('articles.mostPopular')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -422,7 +422,7 @@ const ArticlesSection = () => {
             >
               {/* Category Filter */}
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">Category</label>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">{t('articles.category')}</label>
                 <div className="flex flex-wrap gap-2">
                   {CATEGORIES.map((category) => (
                     <button
@@ -434,7 +434,7 @@ const ArticlesSection = () => {
                           : 'bg-surface text-muted-foreground hover:text-foreground hover:bg-muted'
                       }`}
                     >
-                      {category}
+                      {category === 'All' ? t('articles.all') : category}
                     </button>
                   ))}
                 </div>
@@ -443,7 +443,7 @@ const ArticlesSection = () => {
               {/* Author Filter */}
               {uniqueAuthors.length > 1 && (
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground mb-2 block">Author</label>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">{t('articles.author')}</label>
                   <div className="flex flex-wrap gap-2">
                     {uniqueAuthors.map((author) => (
                       <button
@@ -456,7 +456,7 @@ const ArticlesSection = () => {
                         }`}
                       >
                         <User className="h-3 w-3" />
-                        {author}
+                        {author === 'All' ? t('articles.all') : author}
                       </button>
                     ))}
                   </div>
@@ -467,7 +467,7 @@ const ArticlesSection = () => {
 
           {/* Results count */}
           <div className="text-sm text-muted-foreground mt-4">
-            Showing {filteredAndSortedArticles.length} of {articles.length} articles
+            {t('articles.showingOf').replace('{count}', String(filteredAndSortedArticles.length)).replace('{total}', String(articles.length))}
           </div>
         </motion.div>
 

@@ -4,7 +4,6 @@ import HeroSection from "@/components/HeroSection";
 import ArticlesSection from "@/components/ArticlesSection";
 import ChatSection from "@/components/ChatSection";
 import MerchSection from "@/components/MerchSection";
-import SocialMediaSection from "@/components/SocialMediaSection";
 import AIAgent from "@/components/AIAgent";
 import Footer from "@/components/Footer";
 import SplashIntro from "@/components/SplashIntro";
@@ -24,7 +23,7 @@ const Index = () => {
             <main>
               <HeroSection />
               <ChatSection />
-              <SocialMediaSection />
+              <ArticlesSection />
               {/* <MerchSection /> */}
             </main>
             <Footer />

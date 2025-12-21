@@ -86,7 +86,7 @@ ${keywords && keywords.length > 0 ? `Keywords: ${keywords.join(', ')}` : ''}`;
         'X-Title': 'Menlifoot Translation'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-sonnet-4-5',
+        model: 'anthropic/claude-sonnet-4',
         messages: [
           { role: 'system', content: 'You are a professional translator specializing in sports journalism. Always respond with valid JSON only.' },
           { role: 'user', content: prompt }

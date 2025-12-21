@@ -27,6 +27,43 @@ interface Article {
   keywords: string[] | null;
 }
 
+// Helper to update meta tags dynamically
+const updateMetaTags = (article: Article) => {
+  const description = article.summary || article.content.substring(0, 100).replace(/\s+/g, ' ').trim() + "...";
+  const imageUrl = article.thumbnail_url || "https://menlifoot.ca/og-image.png";
+  const pageUrl = window.location.href;
+
+  // Update document title
+  document.title = `${article.title} | Menlifoot`;
+
+  // Update or create meta tags
+  const updateMeta = (property: string, content: string, isProperty = true) => {
+    const attr = isProperty ? 'property' : 'name';
+    let meta = document.querySelector(`meta[${attr}="${property}"]`) as HTMLMetaElement;
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute(attr, property);
+      document.head.appendChild(meta);
+    }
+    meta.content = content;
+  };
+
+  // Open Graph
+  updateMeta('og:title', article.title);
+  updateMeta('og:description', description);
+  updateMeta('og:image', imageUrl);
+  updateMeta('og:url', pageUrl);
+  updateMeta('og:type', 'article');
+
+  // Twitter
+  updateMeta('twitter:title', article.title, false);
+  updateMeta('twitter:description', description, false);
+  updateMeta('twitter:image', imageUrl, false);
+
+  // Standard meta
+  updateMeta('description', description, false);
+};
+
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
@@ -64,6 +101,7 @@ const ArticleDetail = () => {
       console.error("Error fetching article:", error);
     } else if (data) {
       setArticle(data);
+      updateMetaTags(data); // Update OG meta tags for sharing
       fetchSimilarArticles(data.category, articleId);
     }
     setLoading(false);

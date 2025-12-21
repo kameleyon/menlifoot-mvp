@@ -26,7 +26,7 @@ const Footer = () => {
     ],
     [t('footer.content')]: [
       { key: 'podcast', label: t('footer.podcast'), href: '/podcasts' },
-      { key: 'articles', label: t('nav.articles'), href: '#articles' },
+      { key: 'articles', label: t('nav.articles'), href: '/articles' },
     ],
   };
 

@@ -56,8 +56,9 @@ type SortOption = 'latest' | 'oldest' | 'popular';
 interface ArticleLike {
   article_id: string;
   count: number;
-  userLiked: boolean;
 }
+
+const LIKES_STORAGE_KEY = 'menlifoot_article_likes';
 
 const ArticlesSection = () => {
   const navigate = useNavigate();
@@ -162,6 +163,20 @@ const ArticlesSection = () => {
     }
   }, [translateArticle]);
 
+  // Get liked articles from localStorage
+  const getStoredLikes = useCallback((): string[] => {
+    try {
+      const stored = localStorage.getItem(LIKES_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }, []);
+
+  const setStoredLikes = useCallback((likedIds: string[]) => {
+    localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(likedIds));
+  }, []);
+
   const fetchLikes = useCallback(async () => {
     const { data: likesData } = await supabase
       .from("article_likes")
@@ -175,27 +190,13 @@ const ArticlesSection = () => {
         if (existing) {
           existing.count++;
         } else {
-          likesMap.set(like.article_id, { article_id: like.article_id, count: 1, userLiked: false });
+          likesMap.set(like.article_id, { article_id: like.article_id, count: 1 });
         }
       });
 
-      if (user) {
-        const { data: userLikes } = await supabase
-          .from("article_likes")
-          .select("article_id")
-          .eq("user_id", user.id);
-
-        userLikes?.forEach((like) => {
-          const existing = likesMap.get(like.article_id);
-          if (existing) {
-            existing.userLiked = true;
-          }
-        });
-      }
-
       setLikes(likesMap);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     fetchArticles();
@@ -281,55 +282,46 @@ const ArticlesSection = () => {
     setSortBy('latest');
   };
 
-  const handleLike = async (articleId: string, e: React.MouseEvent) => {
+  const handleLike = (articleId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!user) {
-      toast({
-        title: t('articles.loginToLike') || "Login required",
-        description: t('articles.loginToLikeDesc') || "Please login to like articles",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const currentLike = likes.get(articleId);
-    const isLiked = currentLike?.userLiked || false;
+    const storedLikes = getStoredLikes();
+    const isLiked = storedLikes.includes(articleId);
 
     if (isLiked) {
-      await supabase
-        .from("article_likes")
-        .delete()
-        .eq("article_id", articleId)
-        .eq("user_id", user.id);
+      // Unlike - remove from localStorage
+      const newStoredLikes = storedLikes.filter(id => id !== articleId);
+      setStoredLikes(newStoredLikes);
 
       setLikes((prev) => {
         const newMap = new Map(prev);
         const existing = newMap.get(articleId);
         if (existing) {
           existing.count = Math.max(0, existing.count - 1);
-          existing.userLiked = false;
         }
         return newMap;
       });
     } else {
-      await supabase
-        .from("article_likes")
-        .insert({ article_id: articleId, user_id: user.id });
+      // Like - add to localStorage
+      const newStoredLikes = [...storedLikes, articleId];
+      setStoredLikes(newStoredLikes);
 
       setLikes((prev) => {
         const newMap = new Map(prev);
         const existing = newMap.get(articleId);
         if (existing) {
           existing.count++;
-          existing.userLiked = true;
         } else {
-          newMap.set(articleId, { article_id: articleId, count: 1, userLiked: true });
+          newMap.set(articleId, { article_id: articleId, count: 1 });
         }
         return newMap;
       });
     }
+  };
+
+  const isArticleLiked = (articleId: string): boolean => {
+    return getStoredLikes().includes(articleId);
   };
 
   const handleShare = async (article: TranslatedArticle, e: React.MouseEvent) => {
@@ -338,18 +330,28 @@ const ArticlesSection = () => {
     
     const shareUrl = `${window.location.origin}/articles/${article.id}`;
 
-    if (navigator.share) {
-      try {
+    try {
+      if (navigator.share) {
         await navigator.share({
           title: article.title,
           text: article.summary || article.title,
           url: shareUrl,
         });
-      } catch (err) {
-        console.log("Share cancelled");
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast({
+          title: t('articles.linkCopied') || "Link copied!",
+          description: t('articles.shareSuccess') || "Article link copied to clipboard",
+        });
       }
-    } else {
-      await navigator.clipboard.writeText(shareUrl);
+    } catch (err) {
+      // Fallback for when clipboard API fails
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
       toast({
         title: t('articles.linkCopied') || "Link copied!",
         description: t('articles.shareSuccess') || "Article link copied to clipboard",
@@ -622,12 +624,12 @@ const ArticlesSection = () => {
                       <button
                         onClick={(e) => handleLike(article.id, e)}
                         className={`flex items-center gap-1 transition-colors ${
-                          likes.get(article.id)?.userLiked
+                          isArticleLiked(article.id)
                             ? 'text-red-500'
                             : 'hover:text-red-500'
                         }`}
                       >
-                        <Heart className={`h-3.5 w-3.5 ${likes.get(article.id)?.userLiked ? 'fill-current' : ''}`} />
+                        <Heart className={`h-3.5 w-3.5 ${isArticleLiked(article.id) ? 'fill-current' : ''}`} />
                         {likes.get(article.id)?.count || 0}
                       </button>
                     </div>

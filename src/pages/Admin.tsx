@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Edit2, LogOut, ArrowLeft, Youtube, Music2, FileText, Calendar, Image, Users, Shield, ShieldOff, Ban, UserCheck, Languages, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Edit2, LogOut, ArrowLeft, Youtube, Music2, FileText, Calendar, Image, Users, Shield, ShieldOff, Ban, UserCheck, Languages, RefreshCw, X, Tag } from 'lucide-react';
 import menlifootBall from '@/assets/menlifoot-ball.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -125,6 +125,19 @@ const ARTICLE_CATEGORIES = [
   'Opinion',
 ];
 
+// Common keyword suggestions for football articles
+const KEYWORD_SUGGESTIONS = [
+  'football', 'soccer', 'world cup', 'champions league', 'premier league', 'la liga',
+  'serie a', 'bundesliga', 'ligue 1', 'transfer', 'goal', 'match', 'player',
+  'team', 'coach', 'tactics', 'analysis', 'hat-trick', 'penalty', 'red card',
+  'yellow card', 'VAR', 'offside', 'assist', 'clean sheet', 'derby', 'rivalry',
+  'injury', 'comeback', 'upset', 'Real Madrid', 'Barcelona', 'Manchester United',
+  'Liverpool', 'Chelsea', 'Arsenal', 'Bayern Munich', 'PSG', 'Juventus',
+  'Inter Milan', 'AC Milan', 'Borussia Dortmund', 'Atletico Madrid',
+  'Haiti', 'World Cup 2026', 'Messi', 'Ronaldo', 'Mbappe', 'Haaland', 'Bellingham',
+  'Vinicius Jr', 'Kane', 'Salah', 'De Bruyne', 'Neymar'
+];
+
 const generateKeywords = (title: string, content: string, category: string): string[] => {
   const text = `${title} ${content} ${category}`.toLowerCase();
   const commonWords = ['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'can', 'this', 'that', 'these', 'those', 'it', 'its'];
@@ -177,6 +190,9 @@ const Admin = () => {
   const [retranslatingId, setRetranslatingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
+  const [keywordInput, setKeywordInput] = useState('');
+  const [showKeywordSuggestions, setShowKeywordSuggestions] = useState(false);
+  const keywordInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user, isAdmin, isEditor, loading, adminLoading, signOut } = useAuth();
   const navigate = useNavigate();
@@ -416,7 +432,10 @@ const Admin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const keywords = generateKeywords(articleFormData.title, articleFormData.content, articleFormData.category);
+    // Use custom keywords if provided, otherwise auto-generate
+    const keywords = articleFormData.keywords.length > 0 
+      ? articleFormData.keywords 
+      : generateKeywords(articleFormData.title, articleFormData.content, articleFormData.category);
 
     const articleData = {
       title: articleFormData.title,
@@ -548,7 +567,44 @@ const Admin = () => {
       is_published: false,
       original_language: 'en',
     });
+    setKeywordInput('');
   };
+
+  const handleAddKeyword = (keyword: string) => {
+    const trimmedKeyword = keyword.trim().toLowerCase();
+    if (trimmedKeyword && !articleFormData.keywords.includes(trimmedKeyword)) {
+      setArticleFormData(prev => ({
+        ...prev,
+        keywords: [...prev.keywords, trimmedKeyword]
+      }));
+    }
+    setKeywordInput('');
+    setShowKeywordSuggestions(false);
+  };
+
+  const handleRemoveKeyword = (keywordToRemove: string) => {
+    setArticleFormData(prev => ({
+      ...prev,
+      keywords: prev.keywords.filter(k => k !== keywordToRemove)
+    }));
+  };
+
+  const handleKeywordInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (keywordInput.trim()) {
+        handleAddKeyword(keywordInput);
+      }
+    } else if (e.key === 'Escape') {
+      setShowKeywordSuggestions(false);
+    }
+  };
+
+  const filteredSuggestions = KEYWORD_SUGGESTIONS.filter(
+    suggestion => 
+      suggestion.toLowerCase().includes(keywordInput.toLowerCase()) &&
+      !articleFormData.keywords.includes(suggestion.toLowerCase())
+  ).slice(0, 8);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -967,7 +1023,72 @@ const Admin = () => {
                         rows={8}
                         required
                       />
-                      <p className="text-xs text-muted-foreground">Keywords will be auto-generated from the content</p>
+                    </div>
+
+                    {/* Keywords/Tags Section */}
+                    <div className="space-y-2">
+                      <Label htmlFor="article-keywords" className="flex items-center gap-2">
+                        <Tag className="h-4 w-4" />
+                        Keywords / Tags
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          ref={keywordInputRef}
+                          id="article-keywords"
+                          value={keywordInput}
+                          onChange={(e) => {
+                            setKeywordInput(e.target.value);
+                            setShowKeywordSuggestions(e.target.value.length > 0);
+                          }}
+                          onFocus={() => setShowKeywordSuggestions(keywordInput.length > 0 || true)}
+                          onBlur={() => setTimeout(() => setShowKeywordSuggestions(false), 200)}
+                          onKeyDown={handleKeywordInputKeyDown}
+                          placeholder="Type a keyword and press Enter..."
+                        />
+                        {/* Suggestions dropdown */}
+                        {showKeywordSuggestions && filteredSuggestions.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                            {filteredSuggestions.map((suggestion) => (
+                              <button
+                                key={suggestion}
+                                type="button"
+                                className="w-full px-3 py-2 text-left hover:bg-muted transition-colors text-sm"
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  handleAddKeyword(suggestion);
+                                }}
+                              >
+                                {suggestion}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {/* Selected keywords */}
+                      {articleFormData.keywords.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {articleFormData.keywords.map((keyword) => (
+                            <span
+                              key={keyword}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary rounded-full text-xs"
+                            >
+                              {keyword}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveKeyword(keyword)}
+                                className="hover:text-destructive transition-colors"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        {articleFormData.keywords.length > 0 
+                          ? `${articleFormData.keywords.length} keyword(s) added` 
+                          : 'Add custom keywords or leave empty to auto-generate from content'}
+                      </p>
                     </div>
 
                     <div className="flex items-center justify-between pt-2">

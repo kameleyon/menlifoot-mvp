@@ -88,7 +88,7 @@ const ArticlesSection = () => {
 
   const getCacheKey = (articleId: string, targetLang: string) => `${articleId}_${targetLang}`;
 
-  const translateArticle = useCallback(async (article: Article, targetLanguage: string): Promise<TranslatedArticle> => {
+  const fetchTranslation = useCallback(async (article: Article, targetLanguage: string): Promise<TranslatedArticle> => {
     // If article is already in target language, return as-is
     if (article.original_language === targetLanguage) {
       return { ...article, translated: false };
@@ -102,35 +102,39 @@ const ArticlesSection = () => {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('translate-article', {
-        body: {
-          title: article.title,
-          subtitle: article.subtitle,
-          summary: article.summary,
-          content: article.content,
-          keywords: article.keywords,
-          fromLanguage: article.original_language,
-          toLanguage: targetLanguage
-        }
-      });
+      // Fetch from database instead of calling edge function
+      const { data: translation, error } = await supabase
+        .from('article_translations')
+        .select('*')
+        .eq('article_id', article.id)
+        .eq('language', targetLanguage)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching translation:', error);
+        return { ...article, translated: false };
+      }
 
-      const translated: TranslatedArticle = {
-        ...article,
-        title: data.title || article.title,
-        subtitle: data.subtitle || article.subtitle,
-        summary: data.summary || article.summary,
-        content: data.content || article.content,
-        keywords: data.keywords || article.keywords,
-        translated: true
-      };
+      if (translation) {
+        const translated: TranslatedArticle = {
+          ...article,
+          title: translation.title || article.title,
+          subtitle: translation.subtitle || article.subtitle,
+          summary: translation.summary || article.summary,
+          content: translation.content || article.content,
+          keywords: translation.keywords || article.keywords,
+          translated: true
+        };
 
-      // Cache the result
-      translationCache.set(cacheKey, translated);
-      return translated;
+        // Cache the result
+        translationCache.set(cacheKey, translated);
+        return translated;
+      }
+
+      // No translation found, return original
+      return { ...article, translated: false };
     } catch (error) {
-      console.error('Translation error:', error);
+      console.error('Translation fetch error:', error);
       return { ...article, translated: false };
     }
   }, []);
@@ -151,7 +155,7 @@ const ArticlesSection = () => {
 
     try {
       const translated = await Promise.all(
-        articlesToTranslate.map(article => translateArticle(article, targetLanguage))
+        articlesToTranslate.map(article => fetchTranslation(article, targetLanguage))
       );
       setTranslatedArticles(translated);
     } catch (error) {
@@ -161,7 +165,7 @@ const ArticlesSection = () => {
       setTranslating(false);
       translationInProgress.current = false;
     }
-  }, [translateArticle]);
+  }, [fetchTranslation]);
 
   // Get liked articles from localStorage
   const getStoredLikes = useCallback((): string[] => {
@@ -620,7 +624,8 @@ const ArticlesSection = () => {
                         <Eye className="h-3.5 w-3.5" />
                         {article.view_count || 0}
                       </span>
-                      <button
+                      {/* Like button - commented out */}
+                      {/* <button
                         onClick={(e) => handleLike(article.id, e)}
                         className={`flex items-center gap-1 transition-colors ${
                           isArticleLiked(article.id)
@@ -630,7 +635,7 @@ const ArticlesSection = () => {
                       >
                         <Heart className={`h-3.5 w-3.5 ${isArticleLiked(article.id) ? 'fill-current' : ''}`} />
                         {likes.get(article.id)?.count || 0}
-                      </button>
+                      </button> */}
                     </div>
                     <button
                       onClick={(e) => handleShare(article, e)}

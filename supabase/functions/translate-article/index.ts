@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,6 +14,8 @@ const languageNames: Record<string, string> = {
   ht: 'Haitian Creole'
 };
 
+const LANGUAGES = ['en', 'fr', 'es', 'ht'];
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -20,7 +23,17 @@ serve(async (req) => {
   }
 
   try {
-    const { title, subtitle, summary, content, keywords, fromLanguage, toLanguage } = await req.json();
+    const { 
+      articleId, 
+      title, 
+      subtitle, 
+      summary, 
+      content, 
+      keywords, 
+      fromLanguage, 
+      toLanguage,
+      saveToDb = false 
+    } = await req.json();
 
     // If same language, return original content
     if (fromLanguage === toLanguage) {
@@ -57,14 +70,23 @@ ${summary ? `Summary: ${summary}` : ''}
 Content: ${content}
 ${keywords && keywords.length > 0 ? `Keywords: ${keywords.join(', ')}` : ''}`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const openrouterApiKey = Deno.env.get('OPENROUTER_API_KEY');
+    if (!openrouterApiKey) {
+      throw new Error('OPENROUTER_API_KEY is not configured');
+    }
+
+    console.log(`Translating article from ${fromLanguage} to ${toLanguage} using OpenRouter Claude Sonnet 4.5`);
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
+        'Authorization': `Bearer ${openrouterApiKey}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://menlifoot.ca',
+        'X-Title': 'Menlifoot Translation'
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'anthropic/claude-sonnet-4-5',
         messages: [
           { role: 'system', content: 'You are a professional translator specializing in sports journalism. Always respond with valid JSON only.' },
           { role: 'user', content: prompt }
@@ -75,24 +97,24 @@ ${keywords && keywords.length > 0 ? `Keywords: ${keywords.join(', ')}` : ''}`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI Gateway error:', errorText);
+      console.error('OpenRouter API error:', errorText);
       
-      // On 402 (payment required) or 429 (rate limit), return original content gracefully
+      // On rate limit or payment issues, return original content gracefully
       if (response.status === 402 || response.status === 429) {
-        console.log('AI credits exhausted or rate limited, returning original content');
+        console.log('OpenRouter rate limited or payment required, returning original content');
         return new Response(JSON.stringify({ 
           title, 
           subtitle, 
           summary, 
           content,
           keywords,
-          _translationSkipped: true // Flag to indicate translation was skipped
+          _translationSkipped: true
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
       
-      throw new Error(`AI Gateway error: ${response.status}`);
+      throw new Error(`OpenRouter API error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -116,6 +138,37 @@ ${keywords && keywords.length > 0 ? `Keywords: ${keywords.join(', ')}` : ''}`;
       console.error('Failed to parse translation response:', translatedText);
       // Return original if parsing fails
       translated = { title, subtitle, summary, content, keywords };
+    }
+
+    // Save to database if requested
+    if (saveToDb && articleId) {
+      try {
+        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+        const { error: upsertError } = await supabase
+          .from('article_translations')
+          .upsert({
+            article_id: articleId,
+            language: toLanguage,
+            title: translated.title || title,
+            subtitle: translated.subtitle || subtitle,
+            summary: translated.summary || summary,
+            content: translated.content || content,
+            keywords: translated.keywords || keywords
+          }, {
+            onConflict: 'article_id,language'
+          });
+
+        if (upsertError) {
+          console.error('Error saving translation to DB:', upsertError);
+        } else {
+          console.log(`Translation saved to DB for article ${articleId} in ${toLanguage}`);
+        }
+      } catch (dbError) {
+        console.error('Database error:', dbError);
+      }
     }
 
     return new Response(JSON.stringify(translated), {

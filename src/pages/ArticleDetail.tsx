@@ -214,9 +214,9 @@ const ArticleDetail = () => {
   const [loading, setLoading] = useState(true);
   const [translating, setTranslating] = useState(false);
 
-  // Translate article when language changes
+  // Fetch translation from database when language changes
   useEffect(() => {
-    const translateArticle = async () => {
+    const fetchTranslation = async () => {
       if (!article) return;
       
       const originalLang = article.original_language || 'en';
@@ -227,7 +227,7 @@ const ArticleDetail = () => {
         return;
       }
 
-      // Check cache
+      // Check sessionStorage cache first
       const cacheKey = `article_${article.id}_${language}`;
       const cached = sessionStorage.getItem(cacheKey);
       if (cached) {
@@ -237,40 +237,45 @@ const ArticleDetail = () => {
 
       setTranslating(true);
       try {
-        const { data, error } = await supabase.functions.invoke('translate-article', {
-          body: {
-            title: article.title,
-            subtitle: article.subtitle,
-            summary: article.summary,
-            content: article.content,
-            keywords: article.keywords,
-            fromLanguage: originalLang,
-            toLanguage: language
-          }
-        });
+        // Fetch from database
+        const { data: translation, error } = await supabase
+          .from('article_translations')
+          .select('*')
+          .eq('article_id', article.id)
+          .eq('language', language)
+          .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching translation:', error);
+          setTranslatedArticle(article);
+          return;
+        }
 
-        const translated = {
-          ...article,
-          title: data.title || article.title,
-          subtitle: data.subtitle || article.subtitle,
-          summary: data.summary || article.summary,
-          content: data.content || article.content,
-          keywords: data.keywords || article.keywords
-        };
-
-        sessionStorage.setItem(cacheKey, JSON.stringify(translated));
-        setTranslatedArticle(translated);
+        if (translation) {
+          const translated = {
+            ...article,
+            title: translation.title || article.title,
+            subtitle: translation.subtitle || article.subtitle,
+            summary: translation.summary || article.summary,
+            content: translation.content || article.content,
+            keywords: translation.keywords || article.keywords
+          };
+          sessionStorage.setItem(cacheKey, JSON.stringify(translated));
+          setTranslatedArticle(translated);
+        } else {
+          // No translation in DB, use original
+          console.log(`No translation found for ${language}, using original`);
+          setTranslatedArticle(article);
+        }
       } catch (err) {
-        console.error('Translation error:', err);
+        console.error('Translation fetch error:', err);
         setTranslatedArticle(article);
       } finally {
         setTranslating(false);
       }
     };
 
-    translateArticle();
+    fetchTranslation();
   }, [article, language]);
 
   useEffect(() => {

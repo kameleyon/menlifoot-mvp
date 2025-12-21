@@ -146,7 +146,8 @@ const Navbar = () => {
               </AnimatePresence>
             </div>
 
-            <Button
+            {/* Cart button - commented out since store is disabled */}
+            {/* <Button
               variant="ghost"
               size="icon"
               className="relative text-foreground/70 hover:text-primary hover:bg-primary/10"
@@ -157,7 +158,7 @@ const Navbar = () => {
                   {totalItems}
                 </span>
               )}
-            </Button>
+            </Button> */}
             <Link to="/admin">
               <Button
                 variant="nav"

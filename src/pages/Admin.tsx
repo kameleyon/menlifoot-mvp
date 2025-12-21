@@ -340,6 +340,35 @@ const Admin = () => {
     }
   };
 
+  const triggerTranslations = async (articleId: string, title: string, subtitle: string | null, summary: string | null, content: string, keywords: string[], originalLanguage: string) => {
+    try {
+      toast({ title: 'Translating...', description: 'Auto-translating article to all languages. This may take a minute.' });
+      
+      const { data, error } = await supabase.functions.invoke('translate-all-languages', {
+        body: {
+          articleId,
+          title,
+          subtitle,
+          summary,
+          content,
+          keywords,
+          originalLanguage
+        }
+      });
+
+      if (error) {
+        console.error('Translation trigger error:', error);
+        toast({ title: 'Translation Warning', description: 'Article saved but some translations may have failed.', variant: 'destructive' });
+      } else if (data?.success) {
+        toast({ title: 'Translations Complete', description: 'Article has been translated to all languages.' });
+      } else if (data?.errors?.length > 0) {
+        toast({ title: 'Partial Translation', description: `Some translations failed: ${data.errors.join(', ')}`, variant: 'destructive' });
+      }
+    } catch (err) {
+      console.error('Translation error:', err);
+    }
+  };
+
   const handleArticleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -361,14 +390,32 @@ const Admin = () => {
     };
 
     try {
+      let savedArticleId: string | undefined;
+      
       if (editingArticle) {
         const { error } = await supabase.from('articles').update(articleData).eq('id', editingArticle.id);
         if (error) throw error;
+        savedArticleId = editingArticle.id;
         toast({ title: 'Success', description: 'Article updated!' });
       } else {
-        const { error } = await supabase.from('articles').insert([articleData]);
+        const { data: insertedData, error } = await supabase.from('articles').insert([articleData]).select('id').single();
         if (error) throw error;
+        savedArticleId = insertedData?.id;
         toast({ title: 'Success', description: 'Article added!' });
+      }
+
+      // Trigger translations if article is published
+      if (articleFormData.is_published && savedArticleId) {
+        // Fire and forget - don't block the UI
+        triggerTranslations(
+          savedArticleId,
+          articleFormData.title,
+          articleFormData.subtitle || null,
+          articleFormData.summary || null,
+          articleFormData.content,
+          keywords,
+          articleFormData.original_language
+        );
       }
 
       setIsArticleDialogOpen(false);

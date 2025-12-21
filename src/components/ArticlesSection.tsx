@@ -324,38 +324,37 @@ const ArticlesSection = () => {
     return getStoredLikes().includes(articleId);
   };
 
-  const handleShare = async (article: TranslatedArticle, e: React.MouseEvent) => {
+  const handleShare = (article: TranslatedArticle, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
     const shareUrl = `${window.location.origin}/articles/${article.id}`;
 
+    // Always copy to clipboard first using the most reliable method
+    const textArea = document.createElement('textarea');
+    textArea.value = shareUrl;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    textArea.style.top = '0';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: article.title,
-          text: article.summary || article.title,
-          url: shareUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-        toast({
-          title: t('articles.linkCopied') || "Link copied!",
-          description: t('articles.shareSuccess') || "Article link copied to clipboard",
-        });
-      }
-    } catch (err) {
-      // Fallback for when clipboard API fails
-      const textArea = document.createElement('textarea');
-      textArea.value = shareUrl;
-      document.body.appendChild(textArea);
-      textArea.select();
       document.execCommand('copy');
-      document.body.removeChild(textArea);
       toast({
         title: t('articles.linkCopied') || "Link copied!",
         description: t('articles.shareSuccess') || "Article link copied to clipboard",
       });
+    } catch (err) {
+      console.error('Copy failed:', err);
+      toast({
+        title: "Error",
+        description: "Failed to copy link",
+        variant: "destructive",
+      });
+    } finally {
+      document.body.removeChild(textArea);
     }
   };
 

@@ -532,6 +532,11 @@ const ArticleDetail = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-4 mt-8 pt-8 border-t border-border/50">
+            {/* View count display */}
+            <div className="flex items-center gap-2 text-muted-foreground px-4 py-2 border border-border rounded-md">
+              <Eye className="h-4 w-4" />
+              <span>{(article.view_count || 0) + 1} {t('articles.views') || 'views'}</span>
+            </div>
             {/* Like button commented out for now */}
             {/* <Button
               variant="outline"

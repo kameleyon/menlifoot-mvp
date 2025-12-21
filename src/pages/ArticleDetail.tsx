@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Eye, Heart, Share2, Calendar, User, Clock, Tag } from "lucide-react";
+import { ArrowLeft, Eye, Share2, Calendar, User, Clock, Tag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,51 @@ interface Article {
   published_at: string | null;
   view_count: number | null;
   keywords: string[] | null;
+  original_language?: string;
 }
+
+// Common words to filter out from keywords (stopwords)
+const STOPWORDS = new Set([
+  // French
+  'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'au', 'aux', 'et', 'ou', 'mais', 'donc', 'car', 
+  'que', 'qui', 'quoi', 'dont', 'où', 'ce', 'cette', 'ces', 'son', 'sa', 'ses', 'leur', 'leurs',
+  'nous', 'vous', 'ils', 'elles', 'on', 'je', 'tu', 'il', 'elle', 'pour', 'dans', 'avec', 'sur',
+  'par', 'en', 'est', 'sont', 'a', 'ont', 'été', 'être', 'avoir', 'fait', 'faire', 'plus', 'très',
+  'aussi', 'bien', 'tout', 'tous', 'toute', 'toutes', 'même', 'autre', 'autres', 'quel', 'quelle',
+  'match', 'matchs', 'comme', 'avant', 'après', 'entre', 'sous', 'contre', 'sans', 'chez',
+  // English
+  'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from',
+  'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did',
+  'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'this', 'that',
+  'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'my', 'your', 'his', 'her', 'its',
+  'our', 'their', 'what', 'which', 'who', 'whom', 'whose', 'when', 'where', 'why', 'how',
+  'game', 'games', 'match', 'matches', 'about', 'after', 'before', 'between', 'during',
+  // Spanish
+  'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'y', 'o', 'pero', 'porque', 'como',
+  'que', 'quien', 'cual', 'cuando', 'donde', 'por', 'para', 'con', 'sin', 'sobre', 'entre',
+  'es', 'son', 'está', 'están', 'fue', 'fueron', 'ser', 'estar', 'tener', 'hacer',
+  'partido', 'partidos',
+  // Haitian Creole
+  'ak', 'nan', 'pou', 'ki', 'se', 'te', 'yo', 'li', 'nou', 'ou', 'mwen', 'sa', 'la', 'a',
+  // Common partial words to exclude
+  'cius', 'bernab'
+]);
+
+// Filter and improve keywords
+const filterKeywords = (keywords: string[] | null): string[] => {
+  if (!keywords || keywords.length === 0) return [];
+  
+  return keywords
+    .filter(kw => {
+      const lower = kw.toLowerCase().trim();
+      // Exclude stopwords, very short words, and words with numbers
+      return lower.length > 2 && 
+             !STOPWORDS.has(lower) && 
+             !/\d/.test(kw) &&
+             !/^[a-z]$/.test(lower);
+    })
+    .slice(0, 8); // Limit to 8 keywords max
+};
 
 // Helper to update meta tags dynamically
 const updateMetaTags = (article: Article) => {
@@ -67,13 +110,71 @@ const updateMetaTags = (article: Article) => {
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
-  const { user } = useAuth();
   const { toast } = useToast();
   const [article, setArticle] = useState<Article | null>(null);
+  const [translatedArticle, setTranslatedArticle] = useState<Article | null>(null);
   const [similarArticles, setSimilarArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
-  const [likeCount, setLikeCount] = useState(0);
-  const [userLiked, setUserLiked] = useState(false);
+  const [translating, setTranslating] = useState(false);
+
+  // Translate article when language changes
+  useEffect(() => {
+    const translateArticle = async () => {
+      if (!article) return;
+      
+      const originalLang = article.original_language || 'en';
+      
+      // If same language, use original
+      if (language === originalLang) {
+        setTranslatedArticle(article);
+        return;
+      }
+
+      // Check cache
+      const cacheKey = `article_${article.id}_${language}`;
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        setTranslatedArticle(JSON.parse(cached));
+        return;
+      }
+
+      setTranslating(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('translate-article', {
+          body: {
+            title: article.title,
+            subtitle: article.subtitle,
+            summary: article.summary,
+            content: article.content,
+            keywords: article.keywords,
+            fromLanguage: originalLang,
+            toLanguage: language
+          }
+        });
+
+        if (error) throw error;
+
+        const translated = {
+          ...article,
+          title: data.title || article.title,
+          subtitle: data.subtitle || article.subtitle,
+          summary: data.summary || article.summary,
+          content: data.content || article.content,
+          keywords: data.keywords || article.keywords
+        };
+
+        sessionStorage.setItem(cacheKey, JSON.stringify(translated));
+        setTranslatedArticle(translated);
+      } catch (err) {
+        console.error('Translation error:', err);
+        setTranslatedArticle(article);
+      } finally {
+        setTranslating(false);
+      }
+    };
+
+    translateArticle();
+  }, [article, language]);
 
   useEffect(() => {
     if (id) {
@@ -81,12 +182,6 @@ const ArticleDetail = () => {
       incrementViewCount(id);
     }
   }, [id]);
-
-  useEffect(() => {
-    if (id) {
-      fetchLikes(id);
-    }
-  }, [id, user]);
 
   const fetchArticle = async (articleId: string) => {
     setLoading(true);
@@ -101,7 +196,8 @@ const ArticleDetail = () => {
       console.error("Error fetching article:", error);
     } else if (data) {
       setArticle(data);
-      updateMetaTags(data); // Update OG meta tags for sharing
+      setTranslatedArticle(data); // Set initial
+      updateMetaTags(data);
       fetchSimilarArticles(data.category, articleId);
     }
     setLoading(false);
@@ -137,58 +233,8 @@ const ArticleDetail = () => {
     }
   };
 
-  const fetchLikes = async (articleId: string) => {
-    // Get total likes
-    const { data: allLikes } = await supabase
-      .from("article_likes")
-      .select("id")
-      .eq("article_id", articleId);
-
-    setLikeCount(allLikes?.length || 0);
-
-    // Check if user liked
-    if (user) {
-      const { data: userLike } = await supabase
-        .from("article_likes")
-        .select("id")
-        .eq("article_id", articleId)
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      setUserLiked(!!userLike);
-    }
-  };
-
-  const handleLike = async () => {
-    if (!user) {
-      toast({
-        title: t('articles.loginToLike') || "Login required",
-        description: t('articles.loginToLikeDesc') || "Please login to like articles",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!id) return;
-
-    if (userLiked) {
-      await supabase
-        .from("article_likes")
-        .delete()
-        .eq("article_id", id)
-        .eq("user_id", user.id);
-
-      setLikeCount((prev) => Math.max(0, prev - 1));
-      setUserLiked(false);
-    } else {
-      await supabase
-        .from("article_likes")
-        .insert({ article_id: id, user_id: user.id });
-
-      setLikeCount((prev) => prev + 1);
-      setUserLiked(true);
-    }
-  };
+  // Get display article (translated or original)
+  const displayArticle = translatedArticle || article;
 
   const handleShare = () => {
     if (!article) return;
@@ -298,12 +344,19 @@ const ArticleDetail = () => {
               {article.category}
             </Badge>
 
+            {translating && (
+              <div className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
+                <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                {t('articles.translating') || 'Translating...'}
+              </div>
+            )}
+
             <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
-              {article.title}
+              {displayArticle?.title || article.title}
             </h1>
 
-            {article.subtitle && (
-              <p className="text-xl text-muted-foreground mb-6">{article.subtitle}</p>
+            {(displayArticle?.subtitle || article.subtitle) && (
+              <p className="text-xl text-muted-foreground mb-6">{displayArticle?.subtitle || article.subtitle}</p>
             )}
 
             {/* Meta Info */}
@@ -320,7 +373,7 @@ const ArticleDetail = () => {
               </span>
               <span className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                {estimateReadTime(article.content)}
+                {estimateReadTime(displayArticle?.content || article.content)}
               </span>
               <span className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
@@ -343,7 +396,7 @@ const ArticleDetail = () => {
             >
               <img
                 src={article.thumbnail_url}
-                alt={article.title}
+                alt={displayArticle?.title || article.title}
                 className="w-full h-auto max-h-[600px] object-cover"
               />
             </motion.div>
@@ -360,33 +413,36 @@ const ArticleDetail = () => {
             transition={{ delay: 0.2 }}
             className="prose prose-lg prose-invert max-w-none prose-p:text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary"
           >
-            <ReactMarkdown>{article.content}</ReactMarkdown>
+            <ReactMarkdown>{displayArticle?.content || article.content}</ReactMarkdown>
           </motion.div>
 
-          {/* Keywords */}
-          {article.keywords && article.keywords.length > 0 && (
-            <div className="mt-8 pt-8 border-t border-border/50">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Tag className="h-4 w-4 text-muted-foreground" />
-                {article.keywords.map((keyword) => (
-                  <Badge key={keyword} variant="outline" className="text-xs">
-                    {keyword}
-                  </Badge>
-                ))}
+          {/* Keywords - filtered for quality */}
+          {(() => {
+            const filteredKeywords = filterKeywords(displayArticle?.keywords || article.keywords);
+            return filteredKeywords.length > 0 ? (
+              <div className="mt-8 pt-8 border-t border-border/50">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Tag className="h-4 w-4 text-muted-foreground" />
+                  {filteredKeywords.map((keyword) => (
+                    <Badge key={keyword} variant="outline" className="text-xs">
+                      {keyword}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            ) : null;
+          })()}
 
           {/* Action Buttons */}
           <div className="flex items-center gap-4 mt-8 pt-8 border-t border-border/50">
-            <Button
-              variant={userLiked ? "default" : "outline"}
+            {/* Like button commented out for now */}
+            {/* <Button
+              variant="outline"
               onClick={handleLike}
-              className={userLiked ? "bg-red-500 hover:bg-red-600" : ""}
             >
-              <Heart className={`h-4 w-4 mr-2 ${userLiked ? "fill-current" : ""}`} />
-              {likeCount} {t('articles.likes') || 'Likes'}
-            </Button>
+              <Heart className="h-4 w-4 mr-2" />
+              {t('articles.likes') || 'Likes'}
+            </Button> */}
             <Button variant="outline" onClick={handleShare}>
               <Share2 className="h-4 w-4 mr-2" />
               {t('articles.share') || 'Share'}

@@ -1,16 +1,12 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Newspaper, Calendar, Share2, Bookmark, BookmarkCheck, Tag, Loader2, Filter, User, TrendingUp, Clock, X, ChevronDown } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Newspaper, Calendar, Share2, Heart, Tag, Loader2, Filter, User, TrendingUp, Clock, X, ChevronDown, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,14 +53,21 @@ const CATEGORIES = [
 
 type SortOption = 'latest' | 'oldest' | 'popular';
 
+interface ArticleLike {
+  article_id: string;
+  count: number;
+  userLiked: boolean;
+}
+
 const ArticlesSection = () => {
+  const navigate = useNavigate();
   const [articles, setArticles] = useState<Article[]>([]);
   const [translatedArticles, setTranslatedArticles] = useState<TranslatedArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [translating, setTranslating] = useState(false);
-  const [savedArticles, setSavedArticles] = useState<string[]>([]);
-  const [selectedArticle, setSelectedArticle] = useState<TranslatedArticle | null>(null);
+  const [likes, setLikes] = useState<Map<string, ArticleLike>>(new Map());
   const { t, language } = useLanguage();
+  const { user } = useAuth();
   const { toast } = useToast();
   const translationInProgress = useRef(false);
   
@@ -159,14 +162,45 @@ const ArticlesSection = () => {
     }
   }, [translateArticle]);
 
+  const fetchLikes = useCallback(async () => {
+    const { data: likesData } = await supabase
+      .from("article_likes")
+      .select("article_id");
+
+    if (likesData) {
+      const likesMap = new Map<string, ArticleLike>();
+      
+      likesData.forEach((like) => {
+        const existing = likesMap.get(like.article_id);
+        if (existing) {
+          existing.count++;
+        } else {
+          likesMap.set(like.article_id, { article_id: like.article_id, count: 1, userLiked: false });
+        }
+      });
+
+      if (user) {
+        const { data: userLikes } = await supabase
+          .from("article_likes")
+          .select("article_id")
+          .eq("user_id", user.id);
+
+        userLikes?.forEach((like) => {
+          const existing = likesMap.get(like.article_id);
+          if (existing) {
+            existing.userLiked = true;
+          }
+        });
+      }
+
+      setLikes(likesMap);
+    }
+  }, [user]);
+
   useEffect(() => {
     fetchArticles();
-    // Load saved articles from localStorage
-    const saved = localStorage.getItem('savedArticles');
-    if (saved) {
-      setSavedArticles(JSON.parse(saved));
-    }
-  }, []);
+    fetchLikes();
+  }, [fetchLikes]);
 
   // Translate articles when language changes
   useEffect(() => {
@@ -247,45 +281,79 @@ const ArticlesSection = () => {
     setSortBy('latest');
   };
 
-  const handleSave = (articleId: string) => {
-    let newSaved: string[];
-    if (savedArticles.includes(articleId)) {
-      newSaved = savedArticles.filter(id => id !== articleId);
-      toast({ title: t('articles.removed'), description: t('articles.removedFromSaved') });
-    } else {
-      newSaved = [...savedArticles, articleId];
-      toast({ title: t('articles.saved'), description: t('articles.addedToSaved') });
+  const handleLike = async (articleId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      toast({
+        title: t('articles.loginToLike') || "Login required",
+        description: t('articles.loginToLikeDesc') || "Please login to like articles",
+        variant: "destructive",
+      });
+      return;
     }
-    setSavedArticles(newSaved);
-    localStorage.setItem('savedArticles', JSON.stringify(newSaved));
+
+    const currentLike = likes.get(articleId);
+    const isLiked = currentLike?.userLiked || false;
+
+    if (isLiked) {
+      await supabase
+        .from("article_likes")
+        .delete()
+        .eq("article_id", articleId)
+        .eq("user_id", user.id);
+
+      setLikes((prev) => {
+        const newMap = new Map(prev);
+        const existing = newMap.get(articleId);
+        if (existing) {
+          existing.count = Math.max(0, existing.count - 1);
+          existing.userLiked = false;
+        }
+        return newMap;
+      });
+    } else {
+      await supabase
+        .from("article_likes")
+        .insert({ article_id: articleId, user_id: user.id });
+
+      setLikes((prev) => {
+        const newMap = new Map(prev);
+        const existing = newMap.get(articleId);
+        if (existing) {
+          existing.count++;
+          existing.userLiked = true;
+        } else {
+          newMap.set(articleId, { article_id: articleId, count: 1, userLiked: true });
+        }
+        return newMap;
+      });
+    }
   };
 
-  const handleShare = async (article: TranslatedArticle) => {
-    const siteUrl = window.location.origin;
-    const shareUrl = `${siteUrl}/#articles`;
-    const shareTextWithUrl = `${article.title} - ${shareUrl}`;
+  const handleShare = async (article: TranslatedArticle, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const shareUrl = `${window.location.origin}/articles/${article.id}`;
 
-    // Always try clipboard first as it's more reliable
-    try {
-      await navigator.clipboard.writeText(shareTextWithUrl);
-      toast({ title: t('articles.copied'), description: t('articles.linkCopied') });
-    } catch (error) {
-      // Clipboard failed, try Web Share API as fallback
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: article.title,
-            text: article.summary || article.title,
-            url: shareUrl,
-          });
-        } catch (shareError) {
-          if ((shareError as Error).name !== 'AbortError') {
-            console.error('Error sharing:', shareError);
-          }
-        }
-      } else {
-        toast({ title: t('articles.shareError'), description: t('articles.shareErrorDesc'), variant: 'destructive' });
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: article.title,
+          text: article.summary || article.title,
+          url: shareUrl,
+        });
+      } catch (err) {
+        console.log("Share cancelled");
       }
+    } else {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: t('articles.linkCopied') || "Link copied!",
+        description: t('articles.shareSuccess') || "Article link copied to clipboard",
+      });
     }
   };
 
@@ -474,200 +542,109 @@ const ArticlesSection = () => {
         {/* Articles Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAndSortedArticles.map((article, index) => (
-            <motion.article
-              key={article.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 * index }}
-              className="glass-card overflow-hidden hover-lift group cursor-pointer"
-              onClick={() => setSelectedArticle(article)}
-            >
-              {/* Thumbnail */}
-              {article.thumbnail_url && (
-                <div className="aspect-video overflow-hidden">
-                  <img
-                    src={article.thumbnail_url}
-                    alt={article.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-              )}
-              
-              <div className="p-5">
-                {/* Category, Author & Date */}
-                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-primary font-medium uppercase tracking-wider px-2 py-1 bg-primary/10 rounded">
-                      {article.category}
+            <Link to={`/articles/${article.id}`} key={article.id}>
+              <motion.article
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 * index }}
+                className="glass-card overflow-hidden hover-lift group cursor-pointer h-full"
+              >
+                {/* Thumbnail */}
+                {article.thumbnail_url && (
+                  <div className="aspect-video overflow-hidden">
+                    <img
+                      src={article.thumbnail_url}
+                      alt={article.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                )}
+                
+                <div className="p-5">
+                  {/* Category, Author & Date */}
+                  <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-primary font-medium uppercase tracking-wider px-2 py-1 bg-primary/10 rounded">
+                        {article.category}
+                      </span>
+                      {article.author && (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          {article.author}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(article.published_at)}
                     </span>
-                    {article.author && (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        {article.author}
-                      </span>
-                    )}
                   </div>
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {formatDate(article.published_at)}
-                  </span>
-                </div>
 
-                {/* Title */}
-                <h3 className="font-display text-xl font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                  {article.title}
-                </h3>
+                  {/* Title */}
+                  <h3 className="font-display text-xl font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                    {article.title}
+                  </h3>
 
-                {/* Subtitle */}
-                {article.subtitle && (
-                  <p className="text-muted-foreground text-sm font-medium mb-2 line-clamp-1">
-                    {article.subtitle}
-                  </p>
-                )}
+                  {/* Subtitle */}
+                  {article.subtitle && (
+                    <p className="text-muted-foreground text-sm font-medium mb-2 line-clamp-1">
+                      {article.subtitle}
+                    </p>
+                  )}
 
-                {/* Summary */}
-                {article.summary && (
-                  <p className="text-muted-foreground text-sm line-clamp-2 mb-4">
-                    {article.summary}
-                  </p>
-                )}
+                  {/* Summary */}
+                  {article.summary && (
+                    <p className="text-muted-foreground text-sm line-clamp-2 mb-4">
+                      {article.summary}
+                    </p>
+                  )}
 
-                {/* Keywords */}
-                {article.keywords && article.keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {article.keywords.slice(0, 3).map((keyword, i) => (
-                      <span key={i} className="text-xs text-muted-foreground bg-muted/50 px-2 py-0.5 rounded flex items-center gap-1">
-                        <Tag className="h-2.5 w-2.5" />
-                        {keyword}
+                  {/* Keywords */}
+                  {article.keywords && article.keywords.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {article.keywords.slice(0, 3).map((keyword, i) => (
+                        <span key={i} className="text-xs text-muted-foreground bg-muted/50 px-2 py-0.5 rounded flex items-center gap-1">
+                          <Tag className="h-2.5 w-2.5" />
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Actions - Views, Likes, Share */}
+                  <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Eye className="h-3.5 w-3.5" />
+                        {article.view_count || 0}
                       </span>
-                    ))}
+                      <button
+                        onClick={(e) => handleLike(article.id, e)}
+                        className={`flex items-center gap-1 transition-colors ${
+                          likes.get(article.id)?.userLiked
+                            ? 'text-red-500'
+                            : 'hover:text-red-500'
+                        }`}
+                      >
+                        <Heart className={`h-3.5 w-3.5 ${likes.get(article.id)?.userLiked ? 'fill-current' : ''}`} />
+                        {likes.get(article.id)?.count || 0}
+                      </button>
+                    </div>
+                    <button
+                      onClick={(e) => handleShare(article, e)}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Share2 className="h-3.5 w-3.5" />
+                      {t('articles.share')}
+                    </button>
                   </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex items-center gap-2 pt-3 border-t border-border/50">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSave(article.id);
-                    }}
-                  >
-                    {savedArticles.includes(article.id) ? (
-                      <BookmarkCheck className="h-4 w-4 mr-1 text-primary" />
-                    ) : (
-                      <Bookmark className="h-4 w-4 mr-1" />
-                    )}
-                    {t('articles.save')}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleShare(article);
-                    }}
-                  >
-                    <Share2 className="h-4 w-4 mr-1" />
-                    {t('articles.share')}
-                  </Button>
                 </div>
-              </div>
-            </motion.article>
+              </motion.article>
+            </Link>
           ))}
         </div>
       </div>
-
-      {/* Article Detail Dialog */}
-      <Dialog open={!!selectedArticle} onOpenChange={() => setSelectedArticle(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-background">
-          {selectedArticle && (
-            <div className="space-y-4">
-              {selectedArticle.thumbnail_url && (
-                <div className="aspect-video overflow-hidden rounded-lg -mx-6 -mt-6">
-                  <img
-                    src={selectedArticle.thumbnail_url}
-                    alt={selectedArticle.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              
-              <DialogHeader className="pt-2">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs text-primary font-medium uppercase tracking-wider px-2 py-1 bg-primary/10 rounded">
-                    {selectedArticle.category}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(selectedArticle.published_at)}
-                  </span>
-                </div>
-                <DialogTitle className="text-2xl font-display">
-                  {selectedArticle.title}
-                </DialogTitle>
-                {selectedArticle.subtitle && (
-                  <p className="text-muted-foreground font-medium">
-                    {selectedArticle.subtitle}
-                  </p>
-                )}
-              </DialogHeader>
-
-              {selectedArticle.summary && (
-                <p className="text-muted-foreground italic border-l-2 border-primary pl-4">
-                  {selectedArticle.summary}
-                </p>
-              )}
-
-              <div className="prose prose-invert max-w-none">
-                {selectedArticle.content.split('\n').map((paragraph, i) => (
-                  <p key={i} className="text-foreground mb-4">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-
-              {selectedArticle.keywords && selectedArticle.keywords.length > 0 && (
-                <div className="pt-4 border-t border-border/50">
-                  <p className="text-xs text-muted-foreground mb-2">{t('articles.keywords')}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedArticle.keywords.map((keyword, i) => (
-                      <span key={i} className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full flex items-center gap-1">
-                        <Tag className="h-3 w-3" />
-                        {keyword}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-3 pt-4 border-t border-border/50">
-                <Button
-                  variant="outline"
-                  onClick={() => handleSave(selectedArticle.id)}
-                >
-                  {savedArticles.includes(selectedArticle.id) ? (
-                    <BookmarkCheck className="h-4 w-4 mr-2 text-primary" />
-                  ) : (
-                    <Bookmark className="h-4 w-4 mr-2" />
-                  )}
-                  {savedArticles.includes(selectedArticle.id) ? t('articles.saved') : t('articles.save')}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleShare(selectedArticle)}
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  {t('articles.share')}
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </section>
   );
 };

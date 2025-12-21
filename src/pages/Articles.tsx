@@ -268,7 +268,7 @@ const Articles = () => {
               onClick={() => setSelectedCategory(null)}
               className="rounded-full"
             >
-              {t('filter.all') || 'All'}
+              {t('articles.all') || 'All'}
             </Button>
             {categories.map((category) => (
               <Button

@@ -311,7 +311,7 @@ const ArticleDetail = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="prose prose-lg dark:prose-invert max-w-none"
+            className="prose prose-lg prose-invert max-w-none prose-p:text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary"
           >
             <ReactMarkdown>{article.content}</ReactMarkdown>
           </motion.div>

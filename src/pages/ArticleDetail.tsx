@@ -51,23 +51,120 @@ const STOPWORDS = new Set([
   // Haitian Creole
   'ak', 'nan', 'pou', 'ki', 'se', 'te', 'yo', 'li', 'nou', 'ou', 'mwen', 'sa', 'la', 'a',
   // Common partial words to exclude
-  'cius', 'bernab'
+  'cius', 'bernab', 'jr', 'fc', 'cf'
 ]);
 
-// Filter and improve keywords
+// Known multi-word phrases that should be combined (lowercase for matching)
+const KNOWN_PHRASES: Record<string, string> = {
+  'real+madrid': 'Real Madrid',
+  'madrid+real': 'Real Madrid',
+  'thiago+silva': 'Thiago Silva',
+  'silva+thiago': 'Thiago Silva',
+  'world+cup': 'World Cup',
+  'cup+world': 'World Cup',
+  'coupe+monde': 'Coupe du Monde',
+  'monde+coupe': 'Coupe du Monde',
+  'champions+league': 'Champions League',
+  'league+champions': 'Champions League',
+  'ligue+champions': 'Ligue des Champions',
+  'manchester+united': 'Manchester United',
+  'united+manchester': 'Manchester United',
+  'manchester+city': 'Manchester City',
+  'city+manchester': 'Manchester City',
+  'paris+saint': 'Paris Saint-Germain',
+  'saint+germain': 'Saint-Germain',
+  'psg+paris': 'PSG',
+  'fc+barcelona': 'FC Barcelona',
+  'barcelona+fc': 'FC Barcelona',
+  'bayern+munich': 'Bayern Munich',
+  'munich+bayern': 'Bayern Munich',
+  'juventus+turin': 'Juventus Turin',
+  'atletico+madrid': 'Atlético Madrid',
+  'madrid+atletico': 'Atlético Madrid',
+  'inter+milan': 'Inter Milan',
+  'milan+inter': 'Inter Milan',
+  'ac+milan': 'AC Milan',
+  'milan+ac': 'AC Milan',
+  'borussia+dortmund': 'Borussia Dortmund',
+  'dortmund+borussia': 'Borussia Dortmund',
+  'tottenham+hotspur': 'Tottenham Hotspur',
+  'arsenal+london': 'Arsenal',
+  'chelsea+london': 'Chelsea',
+  'liverpool+fc': 'Liverpool FC',
+  'ballon+or': "Ballon d'Or",
+  'or+ballon': "Ballon d'Or",
+  'kylian+mbappe': 'Kylian Mbappé',
+  'mbappe+kylian': 'Kylian Mbappé',
+  'cristiano+ronaldo': 'Cristiano Ronaldo',
+  'ronaldo+cristiano': 'Cristiano Ronaldo',
+  'lionel+messi': 'Lionel Messi',
+  'messi+lionel': 'Lionel Messi',
+  'erling+haaland': 'Erling Haaland',
+  'haaland+erling': 'Erling Haaland',
+  'vinicius+junior': 'Vinícius Jr.',
+  'junior+vinicius': 'Vinícius Jr.',
+  'neymar+jr': 'Neymar Jr.',
+  'jr+neymar': 'Neymar Jr.',
+  'xabi+alonso': 'Xabi Alonso',
+  'alonso+xabi': 'Xabi Alonso',
+  'carlo+ancelotti': 'Carlo Ancelotti',
+  'ancelotti+carlo': 'Carlo Ancelotti',
+  'pep+guardiola': 'Pep Guardiola',
+  'guardiola+pep': 'Pep Guardiola',
+  'europa+league': 'Europa League',
+  'league+europa': 'Europa League',
+  'premier+league': 'Premier League',
+  'league+premier': 'Premier League',
+  'la+liga': 'La Liga',
+  'liga+la': 'La Liga',
+  'serie+a': 'Serie A',
+  'bundesliga+germany': 'Bundesliga',
+  'ligue+1': 'Ligue 1',
+};
+
+// Filter and improve keywords - combine known phrases
 const filterKeywords = (keywords: string[] | null): string[] => {
   if (!keywords || keywords.length === 0) return [];
   
-  return keywords
-    .filter(kw => {
-      const lower = kw.toLowerCase().trim();
-      // Exclude stopwords, very short words, and words with numbers
-      return lower.length > 2 && 
-             !STOPWORDS.has(lower) && 
-             !/\d/.test(kw) &&
-             !/^[a-z]$/.test(lower);
-    })
-    .slice(0, 8); // Limit to 8 keywords max
+  const lowerKeywords = keywords.map(k => k.toLowerCase().trim());
+  const usedIndices = new Set<number>();
+  const result: string[] = [];
+  
+  // First pass: find and combine known phrases
+  for (let i = 0; i < lowerKeywords.length; i++) {
+    if (usedIndices.has(i)) continue;
+    
+    for (let j = i + 1; j < lowerKeywords.length; j++) {
+      if (usedIndices.has(j)) continue;
+      
+      const combo = `${lowerKeywords[i]}+${lowerKeywords[j]}`;
+      if (KNOWN_PHRASES[combo]) {
+        result.push(KNOWN_PHRASES[combo]);
+        usedIndices.add(i);
+        usedIndices.add(j);
+        break;
+      }
+    }
+  }
+  
+  // Second pass: add remaining valid keywords
+  for (let i = 0; i < keywords.length; i++) {
+    if (usedIndices.has(i)) continue;
+    
+    const kw = keywords[i];
+    const lower = kw.toLowerCase().trim();
+    
+    // Exclude stopwords, very short words, and partial words
+    if (lower.length > 2 && 
+        !STOPWORDS.has(lower) && 
+        !/\d/.test(kw) &&
+        !/^[a-z]$/.test(lower)) {
+      // Capitalize first letter for display
+      result.push(kw.charAt(0).toUpperCase() + kw.slice(1));
+    }
+  }
+  
+  return result.slice(0, 8); // Limit to 8 keywords max
 };
 
 // Helper to update meta tags dynamically

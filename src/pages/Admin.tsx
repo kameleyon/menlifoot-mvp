@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Edit2, LogOut, ArrowLeft, Youtube, Music2, FileText, Calendar, Image, Users, Shield, ShieldOff, Ban, UserCheck } from 'lucide-react';
+import { Plus, Trash2, Edit2, LogOut, ArrowLeft, Youtube, Music2, FileText, Calendar, Image, Users, Shield, ShieldOff, Ban, UserCheck, Languages, RefreshCw } from 'lucide-react';
 import menlifootBall from '@/assets/menlifoot-ball.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -147,6 +147,7 @@ const generateKeywords = (title: string, content: string, category: string): str
 const Admin = () => {
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
+  const [articleTranslations, setArticleTranslations] = useState<Record<string, string[]>>({});
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isPodcastDialogOpen, setIsPodcastDialogOpen] = useState(false);
   const [isArticleDialogOpen, setIsArticleDialogOpen] = useState(false);
@@ -173,6 +174,7 @@ const Admin = () => {
     original_language: 'en',
   });
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [retranslatingId, setRetranslatingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const { toast } = useToast();
@@ -228,6 +230,47 @@ const Admin = () => {
       toast({ title: 'Error', description: 'Failed to load articles.', variant: 'destructive' });
     } else {
       setArticles(data || []);
+      // Fetch translation status for all articles
+      if (data && data.length > 0) {
+        fetchTranslationStatus(data.map(a => a.id));
+      }
+    }
+  };
+
+  const fetchTranslationStatus = async (articleIds: string[]) => {
+    const { data, error } = await supabase
+      .from('article_translations')
+      .select('article_id, language')
+      .in('article_id', articleIds);
+
+    if (!error && data) {
+      const statusMap: Record<string, string[]> = {};
+      data.forEach(t => {
+        if (!statusMap[t.article_id]) {
+          statusMap[t.article_id] = [];
+        }
+        statusMap[t.article_id].push(t.language);
+      });
+      setArticleTranslations(statusMap);
+    }
+  };
+
+  const handleRetranslate = async (article: Article) => {
+    setRetranslatingId(article.id);
+    try {
+      await triggerTranslations(
+        article.id,
+        article.title,
+        article.subtitle,
+        article.summary,
+        article.content,
+        article.keywords || [],
+        article.original_language
+      );
+      // Refresh translation status after a short delay
+      setTimeout(() => fetchTranslationStatus([article.id]), 3000);
+    } finally {
+      setRetranslatingId(null);
     }
   };
 
@@ -954,37 +997,78 @@ const Admin = () => {
                   <p className="text-muted-foreground text-center py-8">No articles yet. Add your first article!</p>
                 ) : (
                   <div className="space-y-4">
-                    {articles.map((article) => (
-                      <div key={article.id} className="flex items-center gap-4 p-4 bg-surface rounded-lg border border-border/50">
-                        {article.thumbnail_url ? (
-                          <div className="w-16 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                            <img src={article.thumbnail_url} alt={article.title} className="w-full h-full object-cover" />
+                    {articles.map((article) => {
+                      const translations = articleTranslations[article.id] || [];
+                      const targetLangs = LANGUAGES.filter(l => l.code !== article.original_language);
+                      const allTranslated = targetLangs.every(l => translations.includes(l.code));
+                      
+                      return (
+                        <div key={article.id} className="flex items-center gap-4 p-4 bg-surface rounded-lg border border-border/50">
+                          {article.thumbnail_url ? (
+                            <div className="w-16 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                              <img src={article.thumbnail_url} alt={article.title} className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className="w-16 h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
+                              <FileText className="h-6 w-6 text-primary-foreground" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded">{article.category}</span>
+                              {article.is_published ? (
+                                <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-500 rounded">Published</span>
+                              ) : (
+                                <span className="text-xs px-2 py-0.5 bg-yellow-500/20 text-yellow-500 rounded">Draft</span>
+                              )}
+                              {/* Translation Status */}
+                              {article.is_published && (
+                                <div className="flex items-center gap-1">
+                                  <Languages className="h-3 w-3 text-muted-foreground" />
+                                  {LANGUAGES.map((lang) => {
+                                    const isOriginal = lang.code === article.original_language;
+                                    const hasTranslation = translations.includes(lang.code);
+                                    return (
+                                      <span
+                                        key={lang.code}
+                                        className={cn(
+                                          "text-[10px] px-1.5 py-0.5 rounded font-medium uppercase",
+                                          isOriginal ? "bg-blue-500/20 text-blue-400" :
+                                          hasTranslation ? "bg-green-500/20 text-green-400" :
+                                          "bg-muted text-muted-foreground"
+                                        )}
+                                        title={isOriginal ? `Original (${lang.name})` : hasTranslation ? `Translated to ${lang.name}` : `Not translated to ${lang.name}`}
+                                      >
+                                        {lang.code}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                            <h3 className="font-medium text-foreground truncate">{article.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {article.published_at ? format(new Date(article.published_at), 'MMM d, yyyy') : 'No date set'}
+                            </p>
                           </div>
-                        ) : (
-                          <div className="w-16 h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
-                            <FileText className="h-6 w-6 text-primary-foreground" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded">{article.category}</span>
-                            {article.is_published ? (
-                              <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-500 rounded">Published</span>
-                            ) : (
-                              <span className="text-xs px-2 py-0.5 bg-yellow-500/20 text-yellow-500 rounded">Draft</span>
+                          <div className="flex items-center gap-2">
+                            {article.is_published && !allTranslated && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleRetranslate(article)}
+                                disabled={retranslatingId === article.id}
+                                title="Retranslate article"
+                              >
+                                <RefreshCw className={cn("h-4 w-4", retranslatingId === article.id && "animate-spin")} />
+                              </Button>
                             )}
+                            <Button variant="ghost" size="icon" onClick={() => handleEditArticle(article)}><Edit2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDeleteArticle(article.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
                           </div>
-                          <h3 className="font-medium text-foreground truncate">{article.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {article.published_at ? format(new Date(article.published_at), 'MMM d, yyyy') : 'No date set'}
-                          </p>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleEditArticle(article)}><Edit2 className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDeleteArticle(article.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

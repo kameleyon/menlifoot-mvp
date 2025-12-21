@@ -76,6 +76,22 @@ ${keywords && keywords.length > 0 ? `Keywords: ${keywords.join(', ')}` : ''}`;
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI Gateway error:', errorText);
+      
+      // On 402 (payment required) or 429 (rate limit), return original content gracefully
+      if (response.status === 402 || response.status === 429) {
+        console.log('AI credits exhausted or rate limited, returning original content');
+        return new Response(JSON.stringify({ 
+          title, 
+          subtitle, 
+          summary, 
+          content,
+          keywords,
+          _translationSkipped: true // Flag to indicate translation was skipped
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
       throw new Error(`AI Gateway error: ${response.status}`);
     }
 
@@ -107,9 +123,16 @@ ${keywords && keywords.length > 0 ? `Keywords: ${keywords.join(', ')}` : ''}`;
     });
   } catch (error: unknown) {
     console.error('Translation error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
+    // On any error, return original content instead of breaking the page
+    const { title, subtitle, summary, content, keywords } = await req.clone().json().catch(() => ({}));
+    return new Response(JSON.stringify({ 
+      title: title || '', 
+      subtitle: subtitle || null, 
+      summary: summary || null, 
+      content: content || '',
+      keywords: keywords || [],
+      _error: true
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

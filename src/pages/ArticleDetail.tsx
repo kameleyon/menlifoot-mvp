@@ -152,27 +152,36 @@ const ArticleDetail = () => {
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = () => {
     if (!article) return;
 
     const shareUrl = window.location.href;
 
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: article.title,
-          text: article.summary || article.title,
-          url: shareUrl,
-        });
-      } catch (err) {
-        console.log("Share cancelled");
-      }
-    } else {
-      await navigator.clipboard.writeText(shareUrl);
+    // Use reliable textarea-based copy method
+    const textArea = document.createElement('textarea');
+    textArea.value = shareUrl;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    textArea.style.top = '0';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
       toast({
         title: t('articles.linkCopied') || "Link copied!",
         description: t('articles.shareSuccess') || "Article link copied to clipboard",
       });
+    } catch (err) {
+      console.error('Copy failed:', err);
+      toast({
+        title: "Error",
+        description: "Failed to copy link",
+        variant: "destructive",
+      });
+    } finally {
+      document.body.removeChild(textArea);
     }
   };
 

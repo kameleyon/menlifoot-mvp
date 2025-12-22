@@ -20,6 +20,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.signIn': 'Sign In',
     'nav.login': 'Login',
     'nav.logout': 'Sign Out',
+    'nav.editorial': 'Editorial',
     
     // Profile
     'profile.settings': 'Profile Settings',
@@ -202,6 +203,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.signIn': 'Connexion',
     'nav.login': 'Connexion',
     'nav.logout': 'Déconnexion',
+    'nav.editorial': 'Éditorial',
     
     // Profile
     'profile.settings': 'Paramètres du profil',
@@ -384,6 +386,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.signIn': 'Iniciar Sesión',
     'nav.login': 'Iniciar Sesión',
     'nav.logout': 'Cerrar Sesión',
+    'nav.editorial': 'Editorial',
     
     // Profile
     'profile.settings': 'Configuración del Perfil',
@@ -566,6 +569,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.signIn': 'Konekte',
     'nav.login': 'Konekte',
     'nav.logout': 'Dekonekte',
+    'nav.editorial': 'Editoryal',
     
     // Profile
     'profile.settings': 'Paramèt Pwofil',

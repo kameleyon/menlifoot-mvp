@@ -7,11 +7,13 @@ import { useCart } from "@/contexts/CartContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import ProfileMenu from "./ProfileMenu";
+import EditorialDialog from "./EditorialDialog";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const [isEditorialOpen, setIsEditorialOpen] = useState(false);
   const { totalItems } = useCart();
   const { language, setLanguage, t } = useLanguage();
 
@@ -37,6 +39,7 @@ const Navbar = () => {
     { name: t('nav.podcast'), href: "/podcasts" },
     { name: t('nav.articles'), href: "/articles" },
     { name: t('nav.askMenlifoot'), href: "#chat" },
+    { name: t('nav.editorial'), href: "editorial", isDialog: true },
     // { name: t('nav.store'), href: "#store" },
   ];
 
@@ -78,7 +81,15 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              link.href.startsWith('/') ? (
+              link.isDialog ? (
+                <button
+                  key={link.name}
+                  onClick={() => setIsEditorialOpen(true)}
+                  className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors duration-200"
+                >
+                  {link.name}
+                </button>
+              ) : link.href.startsWith('/') ? (
                 <Link
                   key={link.name}
                   to={link.href}
@@ -198,7 +209,18 @@ const Navbar = () => {
           >
             <div className="container mx-auto px-4 py-4 space-y-2">
               {navLinks.map((link) => (
-                link.href.startsWith('/') ? (
+                link.isDialog ? (
+                  <button
+                    key={link.name}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setIsEditorialOpen(true);
+                    }}
+                    className="block py-3 text-foreground/80 hover:text-primary transition-colors w-full text-left"
+                  >
+                    {link.name}
+                  </button>
+                ) : link.href.startsWith('/') ? (
                   <Link
                     key={link.name}
                     to={link.href}
@@ -231,6 +253,9 @@ const Navbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Editorial Dialog */}
+      <EditorialDialog open={isEditorialOpen} onOpenChange={setIsEditorialOpen} />
     </motion.nav>
   );
 };

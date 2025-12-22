@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Languages, ShoppingCart, ChevronDown } from "lucide-react";
+import { Menu, X, Languages, ChevronDown } from "lucide-react";
 import menlifootBall from "@/assets/menlifoot-ball.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
-import { useLanguage, languageNames, Language } from "@/contexts/LanguageContext";
+import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
+import ProfileMenu from "./ProfileMenu";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -97,8 +98,11 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Language & Actions */}
-          <div className="flex items-center gap-3">
+          {/* Profile & Language & Actions */}
+          <div className="flex items-center gap-2">
+            {/* Profile Menu */}
+            <ProfileMenu />
+
             {/* Language Selector - visible on all screens */}
             <div className="relative">
               <Button

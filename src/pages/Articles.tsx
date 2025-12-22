@@ -43,7 +43,7 @@ const Articles = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const categories = ["Transfers", "Match Analysis", "Player Spotlight", "World Cup", "League Updates", "Opinion"];
+  const categories = ["Match Analysis", "Transfer News", "Player Spotlight", "World Cup 2026", "Champions League", "Premier League", "La Liga", "Serie A", "Bundesliga", "MLS", "Tactics", "Opinion"];
 
   useEffect(() => {
     fetchArticles();

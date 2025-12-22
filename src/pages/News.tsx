@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Calendar, Trophy, Newspaper, Users, Activity, Star } from "lucide-react";
+import { ArrowLeft, Calendar, Trophy, Newspaper, Users, Activity, Star, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -36,6 +37,7 @@ const News = () => {
   const { t } = useLanguage();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(
     location.state?.selectedArticle || null
@@ -208,9 +210,23 @@ const News = () => {
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
               {t('news.footballNews')} <span className="text-gradient-gold">{t('news.newsTitle')}</span>
             </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-6">
               Your source for the latest football news, transfers, and match updates
             </p>
+            
+            {/* Search Bar */}
+            <div className="max-w-xl mx-auto">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder={t('news.searchPlaceholder') || "Search news..."}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 h-12 text-base bg-surface-elevated border-border/50 rounded-xl"
+                />
+              </div>
+            </div>
           </motion.div>
 
           {/* Category Filters */}
@@ -255,8 +271,26 @@ const News = () => {
               <p className="text-muted-foreground">Check back later for updates</p>
             </div>
           ) : (
+            (() => {
+              const filteredNews = news.filter((item) => {
+                if (!searchQuery) return true;
+                const query = searchQuery.toLowerCase();
+                return (
+                  item.title.toLowerCase().includes(query) ||
+                  item.excerpt.toLowerCase().includes(query) ||
+                  item.category.toLowerCase().includes(query)
+                );
+              });
+              
+              return filteredNews.length === 0 ? (
+                <div className="text-center py-20">
+                  <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-foreground mb-2">No results found</h3>
+                  <p className="text-muted-foreground">Try a different search term</p>
+                </div>
+              ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {news.map((item, index) => (
+              {filteredNews.map((item, index) => (
                 <motion.article
                   key={item.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -295,6 +329,8 @@ const News = () => {
                 </motion.article>
               ))}
             </div>
+              );
+            })()
           )}
         </div>
       </main>

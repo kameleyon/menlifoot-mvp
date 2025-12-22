@@ -8,6 +8,7 @@ import AboutUsDialog from "@/components/legal/AboutUsDialog";
 import PrivacyPolicyDialog from "@/components/legal/PrivacyPolicyDialog";
 import TermsOfServiceDialog from "@/components/legal/TermsOfServiceDialog";
 import CookiePolicyDialog from "@/components/legal/CookiePolicyDialog";
+import EditorialDialog from "@/components/EditorialDialog";
 
 const Footer = () => {
   const { t } = useLanguage();
@@ -15,6 +16,7 @@ const Footer = () => {
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
   const [cookieOpen, setCookieOpen] = useState(false);
+  const [editorialOpen, setEditorialOpen] = useState(false);
 
   const footerLinks = {
     [t('footer.company')]: [
@@ -27,6 +29,7 @@ const Footer = () => {
     [t('footer.content')]: [
       { key: 'podcast', label: t('footer.podcast'), href: '/podcasts' },
       { key: 'articles', label: t('nav.articles'), href: '/articles' },
+      { key: 'editorial', label: t('footer.editorial') || 'Editorial', action: () => setEditorialOpen(true) },
     ],
   };
 
@@ -145,6 +148,7 @@ const Footer = () => {
       <PrivacyPolicyDialog open={privacyOpen} onOpenChange={setPrivacyOpen} />
       <TermsOfServiceDialog open={termsOpen} onOpenChange={setTermsOpen} />
       <CookiePolicyDialog open={cookieOpen} onOpenChange={setCookieOpen} />
+      <EditorialDialog open={editorialOpen} onOpenChange={setEditorialOpen} />
     </>
   );
 };

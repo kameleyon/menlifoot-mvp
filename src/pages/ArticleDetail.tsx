@@ -321,18 +321,8 @@ const ArticleDetail = () => {
   };
 
   const incrementViewCount = async (articleId: string) => {
-    const { data: current } = await supabase
-      .from("articles")
-      .select("view_count")
-      .eq("id", articleId)
-      .maybeSingle();
-
-    if (current) {
-      await supabase
-        .from("articles")
-        .update({ view_count: (current.view_count || 0) + 1 })
-        .eq("id", articleId);
-    }
+    // Use the database function to increment view count (bypasses RLS)
+    await supabase.rpc('increment_article_view', { article_id: articleId });
   };
 
   // Get display article (translated or original)

@@ -624,8 +624,7 @@ const ArticlesSection = () => {
                         <Eye className="h-3.5 w-3.5" />
                         {article.view_count || 0}
                       </span>
-                      {/* Like button - commented out */}
-                      {/* <button
+                      <button
                         onClick={(e) => handleLike(article.id, e)}
                         className={`flex items-center gap-1 transition-colors ${
                           isArticleLiked(article.id)
@@ -635,7 +634,7 @@ const ArticlesSection = () => {
                       >
                         <Heart className={`h-3.5 w-3.5 ${isArticleLiked(article.id) ? 'fill-current' : ''}`} />
                         {likes.get(article.id)?.count || 0}
-                      </button> */}
+                      </button>
                     </div>
                     <button
                       onClick={(e) => handleShare(article, e)}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Search, Eye, Heart, Share2, Calendar, User, ArrowRight, Newspaper } from "lucide-react";
+import { Search, Eye, Heart, Share2, Calendar, User, ArrowRight, Newspaper, Filter, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -83,6 +83,8 @@ const Articles = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const hasActiveFilter = selectedCategory !== null;
 
   const categories: string[] = [...CATEGORY_VALUES];
 
@@ -378,33 +380,77 @@ const Articles = () => {
             </div>
           </motion.div>
 
-          {/* Category Filters */}
+          {/* Filter Toggle */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-wrap justify-center gap-2"
+            className="flex items-center justify-center gap-3 mb-4"
           >
             <Button
-              variant={selectedCategory === null ? "default" : "outline"}
+              variant={showFilters ? "default" : "outline"}
               size="sm"
-              onClick={() => setSelectedCategory(null)}
-              className="rounded-full"
+              onClick={() => setShowFilters(!showFilters)}
+              className="gap-2"
             >
-              {t('articles.all') || 'All'}
+              <Filter className="h-4 w-4" />
+              {t('articles.filters')}
+              {hasActiveFilter && (
+                <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary-foreground text-primary rounded-full">
+                  1
+                </span>
+              )}
             </Button>
-            {categories.map((category) => (
+
+            {hasActiveFilter && (
               <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
+                variant="ghost"
                 size="sm"
-                onClick={() => setSelectedCategory(category)}
-                className="rounded-full"
+                onClick={() => setSelectedCategory(null)}
+                className="text-muted-foreground hover:text-foreground gap-1"
               >
-                {getCategoryLabel(t, category)}
+                <X className="h-3 w-3" />
+                {t('articles.clearAll')}
               </Button>
-            ))}
+            )}
           </motion.div>
+
+          {/* Category Filters - Collapsible */}
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="glass-card p-4 max-w-4xl mx-auto"
+            >
+              <label className="text-sm font-medium text-muted-foreground mb-3 block">{t('articles.category')}</label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+                    selectedCategory === null
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-surface text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  {t('articles.all') || 'All'}
+                </button>
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+                      selectedCategory === category
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-surface text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {getCategoryLabel(t, category)}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </div>
       </section>
 

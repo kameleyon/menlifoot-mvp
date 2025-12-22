@@ -1,0 +1,15 @@
+[[edge_functions]]
+  function = "article-meta"
+  path = "/articles/*"
+
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+  # Don't apply this redirect to edge function routes
+  conditions = {Role = ["user"]}

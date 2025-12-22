@@ -5,6 +5,27 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const SITE_URL = "https://menlifoot.ca";
+const SITE_NAME = "Menlifoot";
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
+const TWITTER_HANDLE = "@Menlifoot";
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function truncateDescription(text: string, maxLength = 160): string {
+  if (!text) return "";
+  const cleaned = text.replace(/\s+/g, ' ').trim();
+  if (cleaned.length <= maxLength) return cleaned;
+  return cleaned.substring(0, maxLength - 3).trim() + "...";
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -27,54 +48,62 @@ Deno.serve(async (req) => {
 
     const { data: article, error } = await supabase
       .from("articles")
-      .select("title, summary, content, thumbnail_url, author, published_at")
+      .select("title, summary, content, thumbnail_url, author, published_at, category")
       .eq("id", articleId)
       .eq("is_published", true)
       .maybeSingle();
 
     if (error || !article) {
-      // Redirect to homepage if article not found
+      console.log("Article not found, redirecting to homepage");
       return new Response(null, {
         status: 302,
         headers: {
           ...corsHeaders,
-          "Location": "https://menlifoot.ca",
+          "Location": SITE_URL,
         },
       });
     }
 
     // Generate description from summary or content
-    const description = article.summary || 
-      article.content.substring(0, 160).replace(/\s+/g, ' ').trim() + "...";
+    const description = truncateDescription(
+      article.summary || article.content
+    );
     
-    const imageUrl = article.thumbnail_url || "https://menlifoot.ca/og-image.png";
-    const articleUrl = `https://menlifoot.ca/articles/${articleId}`;
-    const siteName = "Menlifoot";
+    // Use article thumbnail or default OG image
+    const imageUrl = article.thumbnail_url || DEFAULT_OG_IMAGE;
+    const articleUrl = `${SITE_URL}/articles/${articleId}`;
 
-    // Create the HTML page with proper OG meta tags
+    console.log(`Generating OG preview for article: ${article.title}`);
+    console.log(`Image URL: ${imageUrl}`);
+
+    // Create the HTML page with proper OG meta tags for rich link preview
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${escapeHtml(article.title)} | ${siteName}</title>
+    <title>${escapeHtml(article.title)} | ${SITE_NAME}</title>
     
     <!-- Primary Meta Tags -->
     <meta name="title" content="${escapeHtml(article.title)}">
     <meta name="description" content="${escapeHtml(description)}">
     ${article.author ? `<meta name="author" content="${escapeHtml(article.author)}">` : ''}
     
-    <!-- Open Graph / Facebook / WhatsApp -->
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="${articleUrl}">
     <meta property="og:title" content="${escapeHtml(article.title)}">
     <meta property="og:description" content="${escapeHtml(description)}">
     <meta property="og:image" content="${imageUrl}">
+    <meta property="og:image:secure_url" content="${imageUrl}">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:site_name" content="${siteName}">
+    <meta property="og:site_name" content="${SITE_NAME}">
+    <meta property="og:locale" content="en_US">
     ${article.published_at ? `<meta property="article:published_time" content="${article.published_at}">` : ''}
     ${article.author ? `<meta property="article:author" content="${escapeHtml(article.author)}">` : ''}
+    ${article.category ? `<meta property="article:section" content="${escapeHtml(article.category)}">` : ''}
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
@@ -82,7 +111,7 @@ Deno.serve(async (req) => {
     <meta name="twitter:title" content="${escapeHtml(article.title)}">
     <meta name="twitter:description" content="${escapeHtml(description)}">
     <meta name="twitter:image" content="${imageUrl}">
-    <meta name="twitter:site" content="@Menlifoot">
+    <meta name="twitter:site" content="${TWITTER_HANDLE}">
     
     <!-- Canonical -->
     <link rel="canonical" href="${articleUrl}">
@@ -90,6 +119,11 @@ Deno.serve(async (req) => {
     <!-- Redirect to actual article after meta tags are read -->
     <meta http-equiv="refresh" content="0;url=${articleUrl}">
     <script>window.location.href = "${articleUrl}";</script>
+    
+    <style>
+      body { font-family: system-ui, sans-serif; padding: 20px; text-align: center; }
+      a { color: #0066cc; }
+    </style>
 </head>
 <body>
     <p>Redirecting to <a href="${articleUrl}">${escapeHtml(article.title)}</a>...</p>
@@ -100,26 +134,17 @@ Deno.serve(async (req) => {
       headers: {
         ...corsHeaders,
         "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=3600",
+        "Cache-Control": "public, max-age=3600, s-maxage=7200",
       },
     });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error generating article share page:", error);
     return new Response(null, {
       status: 302,
       headers: {
         ...corsHeaders,
-        "Location": "https://menlifoot.ca",
+        "Location": SITE_URL,
       },
     });
   }
 });
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}

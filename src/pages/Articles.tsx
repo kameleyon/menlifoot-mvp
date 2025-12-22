@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Search, Eye, Heart, Share2, Calendar, User, ArrowRight, Newspaper } from "lucide-react";
@@ -25,6 +25,7 @@ interface Article {
   published_at: string | null;
   view_count: number | null;
   keywords: string[] | null;
+  original_language: string | null;
 }
 
 interface ArticleLike {
@@ -33,17 +34,57 @@ interface ArticleLike {
   userLiked: boolean;
 }
 
+const CATEGORY_VALUES = [
+  "Match Analysis",
+  "Transfer News",
+  "Player Spotlight",
+  "World Cup 2026",
+  "Champions League",
+  "Premier League",
+  "La Liga",
+  "Serie A",
+  "Bundesliga",
+  "MLS",
+  "Tactics",
+  "Opinion",
+] as const;
+
+type CategoryValue = (typeof CATEGORY_VALUES)[number];
+
+const CATEGORY_LABEL_KEYS: Record<CategoryValue, string> = {
+  "Match Analysis": "articles.cat.matchAnalysis",
+  "Transfer News": "articles.cat.transferNews",
+  "Player Spotlight": "articles.cat.playerSpotlight",
+  "World Cup 2026": "articles.cat.worldCup2026",
+  "Champions League": "articles.cat.championsLeague",
+  "Premier League": "articles.cat.premierLeague",
+  "La Liga": "articles.cat.laLiga",
+  "Serie A": "articles.cat.serieA",
+  Bundesliga: "articles.cat.bundesliga",
+  MLS: "articles.cat.mls",
+  Tactics: "articles.cat.tactics",
+  Opinion: "articles.cat.opinion",
+};
+
+const getCategoryLabel = (t: (key: string) => string, category: string) => {
+  const key = (CATEGORY_LABEL_KEYS as Record<string, string>)[category];
+  return key ? t(key) : category;
+};
+
 const Articles = () => {
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const { toast } = useToast();
   const [articles, setArticles] = useState<Article[]>([]);
+  const [translatedArticles, setTranslatedArticles] = useState<Article[]>([]);
+  const [translating, setTranslating] = useState(false);
+  const translationInProgress = useRef(false);
   const [likes, setLikes] = useState<Map<string, ArticleLike>>(new Map());
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const categories = ["Match Analysis", "Transfer News", "Player Spotlight", "World Cup 2026", "Champions League", "Premier League", "La Liga", "Serie A", "Bundesliga", "MLS", "Tactics", "Opinion"];
+  const categories: string[] = [...CATEGORY_VALUES];
 
   useEffect(() => {
     fetchArticles();
@@ -61,10 +102,92 @@ const Articles = () => {
     if (error) {
       console.error("Error fetching articles:", error);
     } else {
-      setArticles(data || []);
+      const normalized = (data || []).map((a: any) => ({
+        ...a,
+        original_language: a.original_language || "en",
+      })) as Article[];
+      setArticles(normalized);
     }
     setLoading(false);
   };
+
+  const getTranslationCacheKey = useCallback(
+    (articleId: string, targetLang: string) => `menlifoot_article_${articleId}_${targetLang}`,
+    []
+  );
+
+  const fetchTranslation = useCallback(
+    async (article: Article, targetLang: string): Promise<Article> => {
+      const originalLang = article.original_language || "en";
+      if (originalLang === targetLang) return article;
+
+      const cacheKey = getTranslationCacheKey(article.id, targetLang);
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          return JSON.parse(cached) as Article;
+        } catch {
+          // ignore cache parse errors
+        }
+      }
+
+      const { data: translation, error } = await supabase
+        .from("article_translations")
+        .select("*")
+        .eq("article_id", article.id)
+        .eq("language", targetLang)
+        .maybeSingle();
+
+      if (error || !translation) return article;
+
+      const merged: Article = {
+        ...article,
+        title: translation.title || article.title,
+        subtitle: translation.subtitle || article.subtitle,
+        summary: translation.summary || article.summary,
+        content: translation.content || article.content,
+        keywords: translation.keywords || article.keywords,
+      };
+
+      sessionStorage.setItem(cacheKey, JSON.stringify(merged));
+      return merged;
+    },
+    [getTranslationCacheKey]
+  );
+
+  useEffect(() => {
+    if (articles.length === 0) return;
+    if (translationInProgress.current) return;
+
+    let cancelled = false;
+
+    const run = async () => {
+      translationInProgress.current = true;
+
+      const needsTranslation = articles.some((a) => {
+        const originalLang = a.original_language || "en";
+        if (originalLang === language) return false;
+        const cacheKey = getTranslationCacheKey(a.id, language);
+        return !sessionStorage.getItem(cacheKey);
+      });
+
+      if (needsTranslation) setTranslating(true);
+
+      try {
+        const results = await Promise.all(articles.map((a) => fetchTranslation(a, language)));
+        if (!cancelled) setTranslatedArticles(results);
+      } finally {
+        if (!cancelled) setTranslating(false);
+        translationInProgress.current = false;
+      }
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [articles, language, fetchTranslation, getTranslationCacheKey]);
 
   const fetchLikes = async () => {
     // Get all likes counts
@@ -74,7 +197,7 @@ const Articles = () => {
 
     if (likesData) {
       const likesMap = new Map<string, ArticleLike>();
-      
+
       // Count likes per article
       likesData.forEach((like) => {
         const existing = likesMap.get(like.article_id);
@@ -192,21 +315,21 @@ const Articles = () => {
     });
   };
 
+  const displayArticles = translatedArticles.length > 0 ? translatedArticles : articles;
+
   const filteredArticles = useMemo(() => {
-    return articles.filter((article) => {
+    return displayArticles.filter((article) => {
       const matchesSearch = searchQuery
         ? article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           article.summary?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           article.content.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
-      
-      const matchesCategory = selectedCategory
-        ? article.category === selectedCategory
-        : true;
+
+      const matchesCategory = selectedCategory ? article.category === selectedCategory : true;
 
       return matchesSearch && matchesCategory;
     });
-  }, [articles, searchQuery, selectedCategory]);
+  }, [displayArticles, searchQuery, selectedCategory]);
 
   const featuredArticle = filteredArticles[0];
   const secondaryArticles = filteredArticles.slice(1, 4);
@@ -278,7 +401,7 @@ const Articles = () => {
                 onClick={() => setSelectedCategory(category)}
                 className="rounded-full"
               >
-                {category}
+                {getCategoryLabel(t, category)}
               </Button>
             ))}
           </motion.div>
@@ -327,7 +450,7 @@ const Articles = () => {
                       
                       <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
                         <Badge variant="secondary" className="mb-4 bg-primary/90 text-primary-foreground">
-                          {featuredArticle.category}
+                          {getCategoryLabel(t, featuredArticle.category)}
                         </Badge>
                         <h2 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors">
                           {featuredArticle.title}
@@ -399,7 +522,7 @@ const Articles = () => {
                         />
                         <div className="flex-1 min-w-0">
                           <Badge variant="outline" className="mb-2 text-xs">
-                            {article.category}
+                            {getCategoryLabel(t, article.category)}
                           </Badge>
                           <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors mb-2">
                             {article.title}
@@ -457,7 +580,7 @@ const Articles = () => {
                           />
                           <div className="p-5">
                             <Badge variant="outline" className="mb-3">
-                              {article.category}
+                              {getCategoryLabel(t, article.category)}
                             </Badge>
                             <h3 className="font-semibold text-lg text-foreground line-clamp-2 group-hover:text-primary transition-colors mb-2">
                               {article.title}

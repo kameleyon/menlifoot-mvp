@@ -22,6 +22,19 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Profile
     'profile.settings': 'Profile Settings',
+    'profile.profile': 'Profile',
+    'profile.security': 'Security',
+    'profile.avatarHint': 'Click to change avatar',
+    'profile.displayName': 'Display Name',
+    'profile.bio': 'Bio',
+    'profile.bioPlaceholder': 'Tell us about yourself...',
+    'profile.email': 'Email',
+    'profile.save': 'Save Changes',
+    'profile.changePassword': 'Change Password',
+    'profile.currentPassword': 'Current Password',
+    'profile.newPassword': 'New Password',
+    'profile.confirmPassword': 'Confirm Password',
+    'profile.updatePassword': 'Update Password',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'New Episode Available',
@@ -188,6 +201,19 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Profile
     'profile.settings': 'Paramètres du profil',
+    'profile.profile': 'Profil',
+    'profile.security': 'Sécurité',
+    'profile.avatarHint': 'Cliquez pour changer l\'avatar',
+    'profile.displayName': 'Nom d\'affichage',
+    'profile.bio': 'Bio',
+    'profile.bioPlaceholder': 'Parlez-nous de vous...',
+    'profile.email': 'Email',
+    'profile.save': 'Enregistrer',
+    'profile.changePassword': 'Changer le mot de passe',
+    'profile.currentPassword': 'Mot de passe actuel',
+    'profile.newPassword': 'Nouveau mot de passe',
+    'profile.confirmPassword': 'Confirmer le mot de passe',
+    'profile.updatePassword': 'Mettre à jour le mot de passe',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'Nouvel Épisode Disponible',
@@ -354,6 +380,19 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Profile
     'profile.settings': 'Configuración del Perfil',
+    'profile.profile': 'Perfil',
+    'profile.security': 'Seguridad',
+    'profile.avatarHint': 'Haz clic para cambiar el avatar',
+    'profile.displayName': 'Nombre',
+    'profile.bio': 'Bio',
+    'profile.bioPlaceholder': 'Cuéntanos sobre ti...',
+    'profile.email': 'Correo electrónico',
+    'profile.save': 'Guardar Cambios',
+    'profile.changePassword': 'Cambiar Contraseña',
+    'profile.currentPassword': 'Contraseña Actual',
+    'profile.newPassword': 'Nueva Contraseña',
+    'profile.confirmPassword': 'Confirmar Contraseña',
+    'profile.updatePassword': 'Actualizar Contraseña',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'Nuevo Episodio Disponible',
@@ -520,6 +559,19 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Profile
     'profile.settings': 'Paramèt Pwofil',
+    'profile.profile': 'Pwofil',
+    'profile.security': 'Sekirite',
+    'profile.avatarHint': 'Klike pou chanje avatar',
+    'profile.displayName': 'Non Afichaj',
+    'profile.bio': 'Bio',
+    'profile.bioPlaceholder': 'Di nou sou ou...',
+    'profile.email': 'Imèl',
+    'profile.save': 'Anrejistre Chanjman',
+    'profile.changePassword': 'Chanje Modpas',
+    'profile.currentPassword': 'Modpas Aktyèl',
+    'profile.newPassword': 'Nouvo Modpas',
+    'profile.confirmPassword': 'Konfime Modpas',
+    'profile.updatePassword': 'Mete Modpas Ajou',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'Nouvo Epizòd Disponib',

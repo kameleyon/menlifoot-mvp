@@ -110,6 +110,45 @@ const Articles = () => {
   useEffect(() => {
     fetchArticles();
     fetchLikes();
+
+    // Subscribe to realtime updates for articles (view counts)
+    const articlesChannel = supabase
+      .channel('articles-page-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'articles'
+        },
+        (payload) => {
+          const updated = payload.new as Article;
+          setArticles(prev => prev.map(a => a.id === updated.id ? { ...a, view_count: updated.view_count || 0 } : a));
+        }
+      )
+      .subscribe();
+
+    // Subscribe to realtime updates for likes
+    const likesChannel = supabase
+      .channel('article-likes-page-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'article_likes'
+        },
+        () => {
+          // Refetch likes on any change
+          fetchLikes();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(articlesChannel);
+      supabase.removeChannel(likesChannel);
+    };
   }, [user]);
 
   const fetchArticles = async () => {

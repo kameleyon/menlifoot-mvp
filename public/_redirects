@@ -1,5 +1,5 @@
-# Article meta for social media crawlers
-/articles/:id  https://tjotexujwnfltszqqovk.supabase.co/functions/v1/article-meta?id=:id  200
+# Article meta for social media crawlers - proxy to edge function
+/articles/*  https://tjotexujwnfltszqqovk.supabase.co/functions/v1/article-meta?id=:splat  200!
 
 # Netlify SPA fallback (React Router deep links)
 /*    /index.html   200

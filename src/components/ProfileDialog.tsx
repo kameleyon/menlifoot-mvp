@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Camera, Loader2, Save, Mail, Lock, User as UserIcon } from "lucide-react";
+import { Camera, Loader2, Save, Mail, Lock, User as UserIcon, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -126,6 +126,35 @@ const ProfileDialog = ({ open, onOpenChange, onProfileUpdate }: ProfileDialogPro
       toast({
         title: t('profile.error') || "Error",
         description: error.message || "Failed to upload avatar",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!user) return;
+    
+    setUploading(true);
+    try {
+      // Try to delete from storage (may fail if file doesn't exist, that's ok)
+      await supabase.storage
+        .from('avatars')
+        .remove([`${user.id}/avatar.png`, `${user.id}/avatar.jpg`, `${user.id}/avatar.jpeg`, `${user.id}/avatar.webp`]);
+      
+      // Clear avatar URL from profile state
+      setProfile(prev => ({ ...prev, avatar_url: null }));
+      
+      toast({
+        title: t('profile.success') || "Success",
+        description: t('profile.avatarRemoved') || "Avatar removed successfully"
+      });
+    } catch (error: any) {
+      console.error('Remove error:', error);
+      toast({
+        title: t('profile.error') || "Error",
+        description: error.message || "Failed to remove avatar",
         variant: "destructive"
       });
     } finally {
@@ -273,9 +302,21 @@ const ProfileDialog = ({ open, onOpenChange, onProfileUpdate }: ProfileDialogPro
                   />
                 </label>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {t('profile.avatarHint') || 'Max 2MB, JPG/PNG'}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-muted-foreground">
+                  {t('profile.avatarHint') || 'Click to change avatar'}
+                </p>
+                {profile.avatar_url && (
+                  <button
+                    onClick={handleRemoveAvatar}
+                    disabled={uploading}
+                    className="text-xs text-destructive hover:text-destructive/80 flex items-center gap-1 transition-colors"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    {t('profile.removeAvatar') || 'Remove'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Display Name */}

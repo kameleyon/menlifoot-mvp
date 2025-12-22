@@ -35,6 +35,8 @@ const translations: Record<Language, Record<string, string>> = {
     'profile.newPassword': 'New Password',
     'profile.confirmPassword': 'Confirm Password',
     'profile.updatePassword': 'Update Password',
+    'profile.removeAvatar': 'Remove',
+    'profile.avatarRemoved': 'Avatar removed successfully',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'New Episode Available',
@@ -214,6 +216,8 @@ const translations: Record<Language, Record<string, string>> = {
     'profile.newPassword': 'Nouveau mot de passe',
     'profile.confirmPassword': 'Confirmer le mot de passe',
     'profile.updatePassword': 'Mettre à jour le mot de passe',
+    'profile.removeAvatar': 'Supprimer',
+    'profile.avatarRemoved': 'Avatar supprimé avec succès',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'Nouvel Épisode Disponible',
@@ -393,6 +397,8 @@ const translations: Record<Language, Record<string, string>> = {
     'profile.newPassword': 'Nueva Contraseña',
     'profile.confirmPassword': 'Confirmar Contraseña',
     'profile.updatePassword': 'Actualizar Contraseña',
+    'profile.removeAvatar': 'Eliminar',
+    'profile.avatarRemoved': 'Avatar eliminado con éxito',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'Nuevo Episodio Disponible',
@@ -572,6 +578,8 @@ const translations: Record<Language, Record<string, string>> = {
     'profile.newPassword': 'Nouvo Modpas',
     'profile.confirmPassword': 'Konfime Modpas',
     'profile.updatePassword': 'Mete Modpas Ajou',
+    'profile.removeAvatar': 'Retire',
+    'profile.avatarRemoved': 'Avatar retire avèk siksè',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'Nouvo Epizòd Disponib',

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import ProfileMenu from "./ProfileMenu";
 import EditorialDialog from "./EditorialDialog";
@@ -16,6 +17,10 @@ const Navbar = () => {
   const [isEditorialOpen, setIsEditorialOpen] = useState(false);
   const { totalItems } = useCart();
   const { language, setLanguage, t } = useLanguage();
+  const { isAdmin, isEditor } = useAuth();
+  
+  // Show admin button only for users with editor or admin roles
+  const canAccessAdmin = isAdmin || isEditor;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -174,15 +179,17 @@ const Navbar = () => {
                 </span>
               )}
             </Button> */}
-            <Link to="/admin">
-              <Button
-                variant="nav"
-                size="sm"
-                className="hidden md:flex"
-              >
-                Admin
-              </Button>
-            </Link>
+            {canAccessAdmin && (
+              <Link to="/admin">
+                <Button
+                  variant="nav"
+                  size="sm"
+                  className="hidden md:flex"
+                >
+                  Admin
+                </Button>
+              </Link>
+            )}
 
             {/* Mobile Menu Toggle */}
             <Button
@@ -241,14 +248,16 @@ const Navbar = () => {
                 )
               ))}
               
-              {/* Admin Link in Mobile Menu */}
-              <Link 
-                to="/admin" 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-3 text-foreground/80 hover:text-primary transition-colors border-t border-border/50 mt-2 pt-4"
-              >
-                Admin
-              </Link>
+              {/* Admin Link in Mobile Menu - only show for admins/editors */}
+              {canAccessAdmin && (
+                <Link 
+                  to="/admin" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block py-3 text-foreground/80 hover:text-primary transition-colors border-t border-border/50 mt-2 pt-4"
+                >
+                  Admin
+                </Link>
+              )}
             </div>
           </motion.div>
         )}

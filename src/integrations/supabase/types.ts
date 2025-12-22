@@ -98,6 +98,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          is_editorial: boolean
           is_published: boolean | null
           keywords: string[] | null
           original_language: string
@@ -116,6 +117,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          is_editorial?: boolean
           is_published?: boolean | null
           keywords?: string[] | null
           original_language?: string
@@ -134,6 +136,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          is_editorial?: boolean
           is_published?: boolean | null
           keywords?: string[] | null
           original_language?: string

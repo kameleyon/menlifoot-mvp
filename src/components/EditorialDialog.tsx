@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { FileText, User } from "lucide-react";
+import { FileText } from "lucide-react";
 
 interface Editor {
   user_id: string;
   display_name: string | null;
   avatar_url: string | null;
-  article_count: number;
+  editorial_count: number;
 }
 
 interface EditorialDialogProps {
@@ -19,6 +20,7 @@ interface EditorialDialogProps {
 
 const EditorialDialog = ({ open, onOpenChange }: EditorialDialogProps) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [editors, setEditors] = useState<Editor[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,20 +57,21 @@ const EditorialDialog = ({ open, onOpenChange }: EditorialDialogProps) => {
 
       if (profilesError) throw profilesError;
 
-      // Get article counts for each user
+      // Get EDITORIAL article counts for each user (only is_editorial = true)
       const { data: articles, error: articlesError } = await supabase
         .from('articles')
         .select('created_by')
         .in('created_by', userIds)
-        .eq('is_published', true);
+        .eq('is_published', true)
+        .eq('is_editorial', true);
 
       if (articlesError) throw articlesError;
 
-      // Count articles per user
-      const articleCounts: Record<string, number> = {};
+      // Count editorial articles per user
+      const editorialCounts: Record<string, number> = {};
       articles?.forEach(article => {
         if (article.created_by) {
-          articleCounts[article.created_by] = (articleCounts[article.created_by] || 0) + 1;
+          editorialCounts[article.created_by] = (editorialCounts[article.created_by] || 0) + 1;
         }
       });
 
@@ -79,12 +82,12 @@ const EditorialDialog = ({ open, onOpenChange }: EditorialDialogProps) => {
           user_id: userId,
           display_name: profile?.display_name || 'Editor',
           avatar_url: profile?.avatar_url || null,
-          article_count: articleCounts[userId] || 0,
+          editorial_count: editorialCounts[userId] || 0,
         };
       });
 
-      // Sort by article count descending
-      editorsData.sort((a, b) => b.article_count - a.article_count);
+      // Sort by editorial count descending
+      editorsData.sort((a, b) => b.editorial_count - a.editorial_count);
 
       setEditors(editorsData);
     } catch (error) {
@@ -97,6 +100,12 @@ const EditorialDialog = ({ open, onOpenChange }: EditorialDialogProps) => {
   const getInitials = (name: string | null) => {
     if (!name) return 'E';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const handleEditorClick = (editor: Editor) => {
+    // Navigate to articles page with author filter and editorial filter
+    onOpenChange(false);
+    navigate(`/articles?author=${encodeURIComponent(editor.display_name || 'Editor')}&editorial=true`);
   };
 
   return (
@@ -115,9 +124,10 @@ const EditorialDialog = ({ open, onOpenChange }: EditorialDialogProps) => {
             <p className="text-center text-muted-foreground py-8">No editors found</p>
           ) : (
             editors.map((editor) => (
-              <div
+              <button
                 key={editor.user_id}
-                className="flex items-center gap-4 p-4 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
+                onClick={() => handleEditorClick(editor)}
+                className="w-full flex items-center gap-4 p-4 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors text-left cursor-pointer"
               >
                 <Avatar className="h-14 w-14 border-2 border-primary/20">
                   <AvatarImage src={editor.avatar_url || undefined} alt={editor.display_name || 'Editor'} />
@@ -127,13 +137,15 @@ const EditorialDialog = ({ open, onOpenChange }: EditorialDialogProps) => {
                 </Avatar>
                 
                 <div className="flex-1">
-                  <h4 className="font-medium text-foreground">{editor.display_name}</h4>
+                  <h4 className="font-medium text-foreground hover:text-primary transition-colors">{editor.display_name}</h4>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
                     <FileText className="h-4 w-4" />
-                    <span>{editor.article_count} {editor.article_count === 1 ? 'article' : 'articles'}</span>
+                    <span className="hover:text-primary transition-colors">
+                      {editor.editorial_count} editorial {editor.editorial_count === 1 ? 'article' : 'articles'}
+                    </span>
                   </div>
                 </div>
-              </div>
+              </button>
             ))
           )}
         </div>

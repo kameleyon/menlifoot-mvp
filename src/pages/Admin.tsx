@@ -121,6 +121,7 @@ const ARTICLE_CATEGORIES = [
   'La Liga',
   'Serie A',
   'Bundesliga',
+  'MLS',
   'Tactics',
   'Opinion',
 ];

@@ -18,6 +18,10 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.askMenlifoot': 'Ask Menlifoot',
     'nav.store': 'Store',
     'nav.signIn': 'Sign In',
+    'nav.logout': 'Sign Out',
+    
+    // Profile
+    'profile.settings': 'Profile Settings',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'New Episode Available',
@@ -52,6 +56,7 @@ const translations: Record<Language, Record<string, string>> = {
     'news.injuries': 'Injuries',
     'news.noNews': 'No news available',
     'news.checkBack': 'Check back later for updates',
+    'news.searchPlaceholder': 'Search news...',
     'news.source': 'Source',
     'news.by': 'By',
     'news.readFull': 'Read Full Article',
@@ -104,6 +109,7 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.privacyPolicy': 'Privacy Policy',
     'footer.termsOfService': 'Terms of Service',
     'footer.cookiePolicy': 'Cookie Policy',
+    'footer.editorial': 'Editorial',
     'footer.emailPlaceholder': 'Enter your email',
     'footer.rights': 'All rights reserved.',
     
@@ -166,6 +172,10 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.askMenlifoot': 'Demander Menlifoot',
     'nav.store': 'Boutique',
     'nav.signIn': 'Connexion',
+    'nav.logout': 'Déconnexion',
+    
+    // Profile
+    'profile.settings': 'Paramètres du profil',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'Nouvel Épisode Disponible',
@@ -200,6 +210,7 @@ const translations: Record<Language, Record<string, string>> = {
     'news.injuries': 'Blessures',
     'news.noNews': 'Aucune actualité disponible',
     'news.checkBack': 'Revenez plus tard pour les mises à jour',
+    'news.searchPlaceholder': 'Rechercher des nouvelles...',
     'news.source': 'Source',
     'news.by': 'Par',
     'news.readFull': 'Lire l\'Article Complet',
@@ -252,6 +263,7 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.privacyPolicy': 'Politique de Confidentialité',
     'footer.termsOfService': 'Conditions d\'Utilisation',
     'footer.cookiePolicy': 'Politique des Cookies',
+    'footer.editorial': 'Éditorial',
     'footer.emailPlaceholder': 'Entrez votre email',
     'footer.rights': 'Tous droits réservés.',
     
@@ -314,6 +326,10 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.askMenlifoot': 'Preguntar Menlifoot',
     'nav.store': 'Tienda',
     'nav.signIn': 'Iniciar Sesión',
+    'nav.logout': 'Cerrar Sesión',
+    
+    // Profile
+    'profile.settings': 'Configuración del Perfil',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'Nuevo Episodio Disponible',
@@ -348,6 +364,7 @@ const translations: Record<Language, Record<string, string>> = {
     'news.injuries': 'Lesiones',
     'news.noNews': 'No hay noticias disponibles',
     'news.checkBack': 'Vuelve más tarde para actualizaciones',
+    'news.searchPlaceholder': 'Buscar noticias...',
     'news.source': 'Fuente',
     'news.by': 'Por',
     'news.readFull': 'Leer Artículo Completo',
@@ -400,6 +417,7 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.privacyPolicy': 'Política de Privacidad',
     'footer.termsOfService': 'Términos de Servicio',
     'footer.cookiePolicy': 'Política de Cookies',
+    'footer.editorial': 'Editorial',
     'footer.emailPlaceholder': 'Ingresa tu email',
     'footer.rights': 'Todos los derechos reservados.',
     
@@ -462,6 +480,10 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.askMenlifoot': 'Mande Menlifoot',
     'nav.store': 'Boutik',
     'nav.signIn': 'Konekte',
+    'nav.logout': 'Dekonekte',
+    
+    // Profile
+    'profile.settings': 'Paramèt Pwofil',
     
     // Hero/Podcast Section
     'hero.newEpisode': 'Nouvo Epizòd Disponib',
@@ -496,6 +518,7 @@ const translations: Record<Language, Record<string, string>> = {
     'news.injuries': 'Blesi',
     'news.noNews': 'Pa gen nouvèl disponib',
     'news.checkBack': 'Retounen pita pou mizajou',
+    'news.searchPlaceholder': 'Chèche nouvèl...',
     'news.source': 'Sous',
     'news.by': 'Pa',
     'news.readFull': 'Li Atik Konplè',
@@ -548,6 +571,7 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.privacyPolicy': 'Règ Konfidansyalite',
     'footer.termsOfService': 'Kondisyon Sèvis',
     'footer.cookiePolicy': 'Règ Cookie',
+    'footer.editorial': 'Editoryal',
     'footer.emailPlaceholder': 'Antre imèl ou',
     'footer.rights': 'Tout dwa rezève.',
     

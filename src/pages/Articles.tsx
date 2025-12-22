@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Search, Eye, Heart, Share2, Calendar, User, ArrowRight, Newspaper, Filter, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -26,6 +26,7 @@ interface Article {
   view_count: number | null;
   keywords: string[] | null;
   original_language: string | null;
+  is_editorial: boolean;
 }
 
 interface ArticleLike {
@@ -75,6 +76,7 @@ const Articles = () => {
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [articles, setArticles] = useState<Article[]>([]);
   const [translatedArticles, setTranslatedArticles] = useState<Article[]>([]);
   const [translating, setTranslating] = useState(false);
@@ -83,10 +85,27 @@ const Articles = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
+  const [showEditorialOnly, setShowEditorialOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const hasActiveFilter = selectedCategory !== null;
+  const hasActiveFilter = selectedCategory !== null || selectedAuthor !== null || showEditorialOnly;
 
   const categories: string[] = [...CATEGORY_VALUES];
+
+  // Handle URL query parameters for filtering
+  useEffect(() => {
+    const authorParam = searchParams.get('author');
+    const editorialParam = searchParams.get('editorial');
+    
+    if (authorParam) {
+      setSelectedAuthor(authorParam);
+      setShowFilters(true);
+    }
+    if (editorialParam === 'true') {
+      setShowEditorialOnly(true);
+      setShowFilters(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchArticles();
@@ -328,10 +347,16 @@ const Articles = () => {
         : true;
 
       const matchesCategory = selectedCategory ? article.category === selectedCategory : true;
+      
+      const matchesAuthor = selectedAuthor 
+        ? article.author?.toLowerCase() === selectedAuthor.toLowerCase() 
+        : true;
+      
+      const matchesEditorial = showEditorialOnly ? article.is_editorial === true : true;
 
-      return matchesSearch && matchesCategory;
+      return matchesSearch && matchesCategory && matchesAuthor && matchesEditorial;
     });
-  }, [displayArticles, searchQuery, selectedCategory]);
+  }, [displayArticles, searchQuery, selectedCategory, selectedAuthor, showEditorialOnly]);
 
   const featuredArticle = filteredArticles[0];
   const secondaryArticles = filteredArticles.slice(1, 4);
@@ -397,10 +422,16 @@ const Articles = () => {
                 <Button
                   variant="ghost"
                   size="lg"
-                  onClick={() => setSelectedCategory(null)}
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setSelectedAuthor(null);
+                    setShowEditorialOnly(false);
+                    setSearchParams({});
+                  }}
                   className="text-muted-foreground hover:text-foreground gap-1 h-14"
                 >
                   <X className="h-4 w-4" />
+                  Clear
                 </Button>
               )}
             </div>

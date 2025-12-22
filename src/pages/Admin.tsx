@@ -60,6 +60,7 @@ interface Article {
   thumbnail_url: string | null;
   published_at: string | null;
   is_published: boolean;
+  is_editorial: boolean;
   original_language: string;
   created_at: string;
 }
@@ -186,6 +187,7 @@ const Admin = () => {
     thumbnail_url: '',
     published_at: null as Date | null,
     is_published: false,
+    is_editorial: false,
     original_language: 'en',
   });
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -465,6 +467,7 @@ const Admin = () => {
       thumbnail_url: articleFormData.thumbnail_url || null,
       published_at: articleFormData.published_at?.toISOString() || (articleFormData.is_published ? new Date().toISOString() : null),
       is_published: articleFormData.is_published,
+      is_editorial: articleFormData.is_editorial,
       original_language: articleFormData.original_language,
       created_by: user?.id,
       author: authorName,
@@ -535,6 +538,7 @@ const Admin = () => {
       thumbnail_url: article.thumbnail_url || '',
       published_at: article.published_at ? new Date(article.published_at) : null,
       is_published: article.is_published,
+      is_editorial: article.is_editorial || false,
       original_language: article.original_language || 'en',
     });
     setIsArticleDialogOpen(true);
@@ -584,6 +588,7 @@ const Admin = () => {
       thumbnail_url: '',
       published_at: null,
       is_published: false,
+      is_editorial: false,
       original_language: 'en',
     });
     setKeywordInput('');
@@ -1112,7 +1117,7 @@ const Admin = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2">
+                    <div className="flex flex-col gap-3 pt-2">
                       <div className="flex items-center gap-2">
                         <Switch
                           id="is-published"
@@ -1120,6 +1125,17 @@ const Admin = () => {
                           onCheckedChange={(checked) => setArticleFormData(prev => ({ ...prev, is_published: checked }))}
                         />
                         <Label htmlFor="is-published">Publish immediately</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id="is-editorial"
+                          checked={articleFormData.is_editorial}
+                          onCheckedChange={(checked) => setArticleFormData(prev => ({ ...prev, is_editorial: checked }))}
+                        />
+                        <Label htmlFor="is-editorial" className="flex items-center gap-1">
+                          Editorial Article
+                          <span className="text-xs text-muted-foreground">(Featured in Editorial section)</span>
+                        </Label>
                       </div>
                     </div>
 

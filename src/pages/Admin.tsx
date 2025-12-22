@@ -166,6 +166,7 @@ const Admin = () => {
   const [isArticleDialogOpen, setIsArticleDialogOpen] = useState(false);
   const [editingPodcast, setEditingPodcast] = useState<Podcast | null>(null);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState<{ display_name: string | null } | null>(null);
   const [podcastFormData, setPodcastFormData] = useState({
     title: '',
     description: '',
@@ -217,11 +218,24 @@ const Admin = () => {
     if (canAccessPanel) {
       fetchPodcasts();
       fetchArticles();
+      fetchCurrentUserProfile();
       if (isAdmin) {
         fetchUsers();
       }
     }
   }, [canAccessPanel, isAdmin]);
+
+  const fetchCurrentUserProfile = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (data) {
+      setCurrentUserProfile(data);
+    }
+  };
 
   const fetchPodcasts = async () => {
     const { data, error } = await supabase
@@ -437,6 +451,9 @@ const Admin = () => {
       ? articleFormData.keywords 
       : generateKeywords(articleFormData.title, articleFormData.content, articleFormData.category);
 
+    // Get author name from profile or fallback to email
+    const authorName = currentUserProfile?.display_name || user?.email?.split('@')[0] || 'Unknown';
+
     const articleData = {
       title: articleFormData.title,
       subtitle: articleFormData.subtitle || null,
@@ -449,6 +466,7 @@ const Admin = () => {
       is_published: articleFormData.is_published,
       original_language: articleFormData.original_language,
       created_by: user?.id,
+      author: authorName,
     };
 
     try {

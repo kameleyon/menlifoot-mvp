@@ -835,22 +835,24 @@ const Admin = () => {
                 {podcasts.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">No podcasts yet. Add your first episode!</p>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {podcasts.map((podcast) => (
-                      <div key={podcast.id} className="flex items-center gap-4 p-4 bg-surface rounded-lg border border-border/50">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
-                          {podcast.platform === 'youtube' ? <Youtube className="h-6 w-6 text-primary-foreground" /> : <Music2 className="h-6 w-6 text-primary-foreground" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            {podcast.episode_number && <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded">EP {podcast.episode_number}</span>}
-                            <h3 className="font-medium text-foreground truncate">{podcast.title}</h3>
+                      <div key={podcast.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 sm:p-4 bg-surface rounded-lg border border-border/50">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
+                            {podcast.platform === 'youtube' ? <Youtube className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" /> : <Music2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />}
                           </div>
-                          <p className="text-sm text-muted-foreground">{podcast.platform} • {podcast.duration || 'No duration'}</p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {podcast.episode_number && <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded">EP {podcast.episode_number}</span>}
+                              <h3 className="font-medium text-foreground truncate text-sm sm:text-base">{podcast.title}</h3>
+                            </div>
+                            <p className="text-xs sm:text-sm text-muted-foreground">{podcast.platform} • {podcast.duration || 'No duration'}</p>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleEditPodcast(podcast)}><Edit2 className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDeletePodcast(podcast.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                        <div className="flex items-center gap-2 justify-end sm:justify-start">
+                          <Button variant="ghost" size="icon" onClick={() => handleEditPodcast(podcast)} className="h-8 w-8"><Edit2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeletePodcast(podcast.id)} className="text-destructive hover:text-destructive h-8 w-8"><Trash2 className="h-4 w-4" /></Button>
                         </div>
                       </div>
                     ))}
@@ -1117,34 +1119,39 @@ const Admin = () => {
                 {articles.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">No articles yet. Add your first article!</p>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {articles.map((article) => {
                       const translations = articleTranslations[article.id] || [];
                       const targetLangs = LANGUAGES.filter(l => l.code !== article.original_language);
                       const allTranslated = targetLangs.every(l => translations.includes(l.code));
                       
                       return (
-                        <div key={article.id} className="flex items-center gap-4 p-4 bg-surface rounded-lg border border-border/50">
-                          {article.thumbnail_url ? (
-                            <div className="w-16 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                              <img src={article.thumbnail_url} alt={article.title} className="w-full h-full object-cover" />
-                            </div>
-                          ) : (
-                            <div className="w-16 h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
-                              <FileText className="h-6 w-6 text-primary-foreground" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded">{article.category}</span>
-                              {article.is_published ? (
-                                <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-500 rounded">Published</span>
-                              ) : (
-                                <span className="text-xs px-2 py-0.5 bg-yellow-500/20 text-yellow-500 rounded">Draft</span>
-                              )}
-                              {/* Translation Status */}
+                        <div key={article.id} className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-surface rounded-lg border border-border/50">
+                          {/* Thumbnail & Info Row */}
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            {article.thumbnail_url ? (
+                              <div className="w-14 h-14 sm:w-16 sm:h-12 rounded-lg overflow-hidden flex-shrink-0">
+                                <img src={article.thumbnail_url} alt={article.title} className="w-full h-full object-cover" />
+                              </div>
+                            ) : (
+                              <div className="w-14 h-14 sm:w-16 sm:h-12 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
+                                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              {/* Badges Row */}
+                              <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                                <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded whitespace-nowrap">{article.category}</span>
+                                {article.is_published ? (
+                                  <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-500 rounded">Published</span>
+                                ) : (
+                                  <span className="text-xs px-2 py-0.5 bg-yellow-500/20 text-yellow-500 rounded">Draft</span>
+                                )}
+                              </div>
+                              
+                              {/* Translation Status - Separate Row on Mobile */}
                               {article.is_published && (
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1 mb-1.5">
                                   <Languages className="h-3 w-3 text-muted-foreground" />
                                   {LANGUAGES.map((lang) => {
                                     const isOriginal = lang.code === article.original_language;
@@ -1166,13 +1173,16 @@ const Admin = () => {
                                   })}
                                 </div>
                               )}
+                              
+                              <h3 className="font-medium text-foreground truncate text-sm sm:text-base">{article.title}</h3>
+                              <p className="text-xs sm:text-sm text-muted-foreground">
+                                {article.published_at ? format(new Date(article.published_at), 'MMM d, yyyy') : 'No date set'}
+                              </p>
                             </div>
-                            <h3 className="font-medium text-foreground truncate">{article.title}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {article.published_at ? format(new Date(article.published_at), 'MMM d, yyyy') : 'No date set'}
-                            </p>
                           </div>
-                          <div className="flex items-center gap-2">
+                          
+                          {/* Actions Row */}
+                          <div className="flex items-center gap-2 justify-end sm:justify-start border-t sm:border-t-0 pt-2 sm:pt-0 sm:border-l sm:pl-3">
                             {article.is_published && !allTranslated && (
                               <Button 
                                 variant="ghost" 
@@ -1180,12 +1190,13 @@ const Admin = () => {
                                 onClick={() => handleRetranslate(article)}
                                 disabled={retranslatingId === article.id}
                                 title="Retranslate article"
+                                className="h-8 w-8"
                               >
                                 <RefreshCw className={cn("h-4 w-4", retranslatingId === article.id && "animate-spin")} />
                               </Button>
                             )}
-                            <Button variant="ghost" size="icon" onClick={() => handleEditArticle(article)}><Edit2 className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDeleteArticle(article.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleEditArticle(article)} className="h-8 w-8"><Edit2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDeleteArticle(article.id)} className="text-destructive hover:text-destructive h-8 w-8"><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       );
@@ -1205,47 +1216,52 @@ const Admin = () => {
                   ) : users.length === 0 ? (
                     <p className="text-muted-foreground text-center py-8">No users found.</p>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {users.map((u) => (
-                        <div key={u.id} className="flex items-center gap-4 p-4 bg-surface rounded-lg border border-border/50">
-                          <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center flex-shrink-0">
-                            <span className="text-sm font-bold text-primary-foreground uppercase">
-                              {u.email?.charAt(0) || '?'}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <h3 className="font-medium text-foreground truncate">{u.email}</h3>
-                              {u.role === 'admin' && (
-                                <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded flex items-center gap-1">
-                                  <Shield className="h-3 w-3" /> Admin
-                                </span>
-                              )}
-                              {u.role === 'editor' && (
-                                <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded flex items-center gap-1">
-                                  <Edit2 className="h-3 w-3" /> Editor
-                                </span>
-                              )}
-                              {u.banned_until && (
-                                <span className="text-xs px-2 py-0.5 bg-destructive/20 text-destructive rounded flex items-center gap-1">
-                                  <Ban className="h-3 w-3" /> Banned
-                                </span>
-                              )}
+                        <div key={u.id} className="flex flex-col gap-3 p-3 sm:p-4 bg-surface rounded-lg border border-border/50">
+                          {/* User Info Row */}
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center flex-shrink-0">
+                              <span className="text-sm font-bold text-primary-foreground uppercase">
+                                {u.email?.charAt(0) || '?'}
+                              </span>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              Joined {format(new Date(u.created_at), 'MMM d, yyyy')}
-                            </p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+                                {u.role === 'admin' && (
+                                  <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded flex items-center gap-1">
+                                    <Shield className="h-3 w-3" /> Admin
+                                  </span>
+                                )}
+                                {u.role === 'editor' && (
+                                  <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded flex items-center gap-1">
+                                    <Edit2 className="h-3 w-3" /> Editor
+                                  </span>
+                                )}
+                                {u.banned_until && (
+                                  <span className="text-xs px-2 py-0.5 bg-destructive/20 text-destructive rounded flex items-center gap-1">
+                                    <Ban className="h-3 w-3" /> Banned
+                                  </span>
+                                )}
+                              </div>
+                              <h3 className="font-medium text-foreground truncate text-sm sm:text-base">{u.email}</h3>
+                              <p className="text-xs sm:text-sm text-muted-foreground">
+                                Joined {format(new Date(u.created_at), 'MMM d, yyyy')}
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 flex-wrap">
+                          
+                          {/* Actions Row */}
+                          <div className="flex flex-wrap items-center gap-2 border-t border-border/50 pt-3">
                             {u.role !== 'admin' && (
                               <Button 
                                 variant="outline" 
                                 size="sm" 
                                 onClick={() => handleSetRole(u.id, 'admin')}
-                                className="text-xs"
+                                className="text-xs h-8"
                               >
-                                <Shield className="h-3 w-3 mr-1" />
-                                Make Admin
+                                <Shield className="h-3 w-3 sm:mr-1" />
+                                <span className="hidden sm:inline">Make Admin</span>
                               </Button>
                             )}
                             {u.role !== 'editor' && u.role !== 'admin' && (
@@ -1253,10 +1269,10 @@ const Admin = () => {
                                 variant="outline" 
                                 size="sm" 
                                 onClick={() => handleSetRole(u.id, 'editor')}
-                                className="text-xs"
+                                className="text-xs h-8"
                               >
-                                <Edit2 className="h-3 w-3 mr-1" />
-                                Make Editor
+                                <Edit2 className="h-3 w-3 sm:mr-1" />
+                                <span className="hidden sm:inline">Make Editor</span>
                               </Button>
                             )}
                             {(u.role === 'admin' || u.role === 'editor') && (
@@ -1269,10 +1285,10 @@ const Admin = () => {
                                 }}
                                 disabled={u.id === user?.id}
                                 title={u.id === user?.id ? "You can't change your own role" : undefined}
-                                className="text-xs"
+                                className="text-xs h-8"
                               >
-                                <ShieldOff className="h-3 w-3 mr-1" />
-                                Remove Role
+                                <ShieldOff className="h-3 w-3 sm:mr-1" />
+                                <span className="hidden sm:inline">Remove Role</span>
                               </Button>
                             )}
                             {u.banned_until ? (
@@ -1285,10 +1301,10 @@ const Admin = () => {
                                 }}
                                 disabled={u.id === user?.id}
                                 title={u.id === user?.id ? "You can't unban your own account" : undefined}
-                                className="text-xs text-green-500"
+                                className="text-xs text-green-500 h-8"
                               >
-                                <UserCheck className="h-3 w-3 mr-1" />
-                                Unban
+                                <UserCheck className="h-3 w-3 sm:mr-1" />
+                                <span className="hidden sm:inline">Unban</span>
                               </Button>
                             ) : (
                               <Button 
@@ -1300,10 +1316,10 @@ const Admin = () => {
                                 }}
                                 disabled={u.id === user?.id}
                                 title={u.id === user?.id ? "You can't ban your own account" : undefined}
-                                className="text-xs text-yellow-500"
+                                className="text-xs text-yellow-500 h-8"
                               >
-                                <Ban className="h-3 w-3 mr-1" />
-                                Ban
+                                <Ban className="h-3 w-3 sm:mr-1" />
+                                <span className="hidden sm:inline">Ban</span>
                               </Button>
                             )}
                             <Button 
@@ -1315,7 +1331,7 @@ const Admin = () => {
                               }}
                               disabled={u.id === user?.id}
                               title={u.id === user?.id ? "You can't delete your own account" : undefined}
-                              className="text-destructive hover:text-destructive"
+                              className="text-destructive hover:text-destructive h-8 w-8 ml-auto"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

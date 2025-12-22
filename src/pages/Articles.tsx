@@ -361,58 +361,49 @@ const Articles = () => {
             </p>
           </motion.div>
 
-          {/* Search Bar */}
+          {/* Search Bar + Filter Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="max-w-2xl mx-auto mb-8"
+            className="max-w-3xl mx-auto mb-8"
           >
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder={t('articles.searchPlaceholder') || "Search articles..."}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-14 text-lg bg-surface-elevated border-border/50 rounded-xl"
-              />
-            </div>
-          </motion.div>
-
-          {/* Filter Toggle */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center justify-center gap-3 mb-4"
-          >
-            <Button
-              variant={showFilters ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
-            >
-              <Filter className="h-4 w-4" />
-              {t('articles.filters')}
-              {hasActiveFilter && (
-                <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary-foreground text-primary rounded-full">
-                  1
-                </span>
-              )}
-            </Button>
-
-            {hasActiveFilter && (
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder={t('articles.searchPlaceholder') || "Search articles..."}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 h-14 text-lg bg-surface-elevated border-border/50 rounded-xl"
+                />
+              </div>
               <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedCategory(null)}
-                className="text-muted-foreground hover:text-foreground gap-1"
+                variant={showFilters ? "default" : "outline"}
+                size="lg"
+                onClick={() => setShowFilters(!showFilters)}
+                className="gap-2 h-14 px-5"
               >
-                <X className="h-3 w-3" />
-                {t('articles.clearAll')}
+                <Filter className="h-4 w-4" />
+                {t('articles.filters')}
+                {hasActiveFilter && (
+                  <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary-foreground text-primary rounded-full">
+                    1
+                  </span>
+                )}
               </Button>
-            )}
+              {hasActiveFilter && (
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => setSelectedCategory(null)}
+                  className="text-muted-foreground hover:text-foreground gap-1 h-14"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </motion.div>
 
           {/* Category Filters - Collapsible */}

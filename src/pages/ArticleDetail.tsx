@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Eye, Share2, Calendar, User, Clock, Tag } from "lucide-react";
+import { ArrowLeft, Eye, Share2, Calendar, User, Clock, Tag, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -207,6 +208,7 @@ const updateMetaTags = (article: Article) => {
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [article, setArticle] = useState<Article | null>(null);
   const [translatedArticle, setTranslatedArticle] = useState<Article | null>(null);
@@ -214,13 +216,17 @@ const ArticleDetail = () => {
   const [loading, setLoading] = useState(true);
   const [translating, setTranslating] = useState(false);
 
+  const [likesCount, setLikesCount] = useState(0);
+  const [userLiked, setUserLiked] = useState(false);
+  const [likeBusy, setLikeBusy] = useState(false);
+
   // Fetch translation from database when language changes
   useEffect(() => {
     const fetchTranslation = async () => {
       if (!article) return;
-      
+
       const originalLang = article.original_language || 'en';
-      
+
       // If same language, use original
       if (language === originalLang) {
         setTranslatedArticle(article);
@@ -279,11 +285,36 @@ const ArticleDetail = () => {
   }, [article, language]);
 
   useEffect(() => {
-    if (id) {
-      fetchArticle(id);
-      incrementViewCount(id);
-    }
+    if (id) fetchArticle(id);
   }, [id]);
+
+  useEffect(() => {
+    if (article) fetchLikes(article.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [article?.id, user?.id]);
+
+  const fetchLikes = async (articleId: string) => {
+    const { count } = await supabase
+      .from('article_likes')
+      .select('*', { count: 'exact', head: true })
+      .eq('article_id', articleId);
+
+    setLikesCount(count ?? 0);
+
+    if (!user) {
+      setUserLiked(false);
+      return;
+    }
+
+    const { data: likedRow } = await supabase
+      .from('article_likes')
+      .select('id')
+      .eq('article_id', articleId)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    setUserLiked(!!likedRow);
+  };
 
   const fetchArticle = async (articleId: string) => {
     setLoading(true);
@@ -301,6 +332,7 @@ const ArticleDetail = () => {
       setTranslatedArticle(data); // Set initial
       updateMetaTags(data);
       fetchSimilarArticles(data.category, articleId);
+      incrementViewCount(articleId);
     }
     setLoading(false);
   };
@@ -322,7 +354,59 @@ const ArticleDetail = () => {
 
   const incrementViewCount = async (articleId: string) => {
     // Use the database function to increment view count (bypasses RLS)
-    await supabase.rpc('increment_article_view', { article_id: articleId });
+    const { error } = await supabase.rpc('increment_article_view', { article_id: articleId });
+
+    if (error) {
+      console.error('Error incrementing view count:', error);
+      return;
+    }
+
+    setArticle((prev) => {
+      if (!prev || prev.id !== articleId) return prev;
+      return { ...prev, view_count: (prev.view_count || 0) + 1 };
+    });
+  };
+
+  const handleLike = async () => {
+    if (!article) return;
+
+    if (!user) {
+      toast({
+        title: t('articles.loginToLike') || "Login required",
+        description: t('articles.loginToLikeDesc') || "Please login to like articles",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (likeBusy) return;
+    setLikeBusy(true);
+
+    try {
+      if (userLiked) {
+        const { error } = await supabase
+          .from('article_likes')
+          .delete()
+          .eq('article_id', article.id)
+          .eq('user_id', user.id);
+
+        if (!error) {
+          setUserLiked(false);
+          setLikesCount((c) => Math.max(0, c - 1));
+        }
+      } else {
+        const { error } = await supabase
+          .from('article_likes')
+          .insert({ article_id: article.id, user_id: user.id });
+
+        if (!error) {
+          setUserLiked(true);
+          setLikesCount((c) => c + 1);
+        }
+      }
+    } finally {
+      setLikeBusy(false);
+    }
   };
 
   // Get display article (translated or original)
@@ -469,7 +553,7 @@ const ArticleDetail = () => {
               </span>
               <span className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
-                {(article.view_count || 0) + 1} {t('articles.views') || 'views'}
+                {article.view_count || 0} {t('articles.views') || 'views'}
               </span>
             </div>
           </motion.div>
@@ -530,16 +614,19 @@ const ArticleDetail = () => {
             {/* View count display */}
             <div className="flex items-center gap-2 text-muted-foreground px-4 py-2 border border-border rounded-md">
               <Eye className="h-4 w-4" />
-              <span>{(article.view_count || 0) + 1} {t('articles.views') || 'views'}</span>
+              <span>{article.view_count || 0} {t('articles.views') || 'views'}</span>
             </div>
-            {/* Like button commented out for now */}
-            {/* <Button
+
+            <Button
               variant="outline"
               onClick={handleLike}
+              disabled={likeBusy}
+              className={userLiked ? 'text-destructive' : undefined}
             >
-              <Heart className="h-4 w-4 mr-2" />
-              {t('articles.likes') || 'Likes'}
-            </Button> */}
+              <Heart className={`h-4 w-4 mr-2 ${userLiked ? 'fill-current' : ''}`} />
+              {likesCount}
+            </Button>
+
             <Button variant="outline" onClick={handleShare}>
               <Share2 className="h-4 w-4 mr-2" />
               {t('articles.share') || 'Share'}

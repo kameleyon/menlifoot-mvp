@@ -546,7 +546,6 @@ const Articles = () => {
                               <Eye className="h-4 w-4" />
                               {featuredArticle.view_count || 0}
                             </span>
-                            {/* Like button commented out
                             <button
                               onClick={(e) => handleLike(featuredArticle.id, e)}
                               className={`flex items-center gap-1 text-sm transition-colors ${
@@ -558,7 +557,6 @@ const Articles = () => {
                               <Heart className={`h-4 w-4 ${likes.get(featuredArticle.id)?.userLiked ? 'fill-current' : ''}`} />
                               {likes.get(featuredArticle.id)?.count || 0}
                             </button>
-                            */}
                             <button
                               onClick={(e) => handleShare(featuredArticle, e)}
                               className="text-muted-foreground hover:text-primary transition-colors"
@@ -602,17 +600,15 @@ const Articles = () => {
                               <Eye className="h-3 w-3" />
                               {article.view_count || 0}
                             </span>
-                            {/* Like button commented out
                             <button
                               onClick={(e) => handleLike(article.id, e)}
-                              className={`flex items-center gap-1 ${
-                                likes.get(article.id)?.userLiked ? 'text-red-500' : ''
+                              className={`flex items-center gap-1 transition-colors ${
+                                likes.get(article.id)?.userLiked ? 'text-red-500' : 'hover:text-red-500'
                               }`}
                             >
                               <Heart className={`h-3 w-3 ${likes.get(article.id)?.userLiked ? 'fill-current' : ''}`} />
                               {likes.get(article.id)?.count || 0}
                             </button>
-                            */}
                             <button onClick={(e) => handleShare(article, e)}>
                               <Share2 className="h-3 w-3" />
                             </button>
@@ -672,17 +668,15 @@ const Articles = () => {
                                   <Eye className="h-4 w-4" />
                                   {article.view_count || 0}
                                 </span>
-                                {/* Like button commented out
                                 <button
                                   onClick={(e) => handleLike(article.id, e)}
-                                  className={`flex items-center gap-1 ${
-                                    likes.get(article.id)?.userLiked ? 'text-red-500' : ''
+                                  className={`flex items-center gap-1 transition-colors ${
+                                    likes.get(article.id)?.userLiked ? 'text-red-500' : 'hover:text-red-500'
                                   }`}
                                 >
                                   <Heart className={`h-4 w-4 ${likes.get(article.id)?.userLiked ? 'fill-current' : ''}`} />
                                   {likes.get(article.id)?.count || 0}
                                 </button>
-                                */}
                                 <button onClick={(e) => handleShare(article, e)}>
                                   <Share2 className="h-4 w-4" />
                                 </button>

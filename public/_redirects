@@ -1,4 +1,2 @@
 # Netlify SPA fallback (React Router deep links)
-# The Netlify Edge Function at netlify/edge-functions/article-meta.ts
-# handles social media crawlers for /articles/* automatically
 /*    /index.html   200

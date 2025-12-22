@@ -135,6 +135,7 @@ const ProfileMenu = () => {
                 {t('profile.settings') || 'Profile Settings'}
               </button>
 
+              {/* Logout button commented out
               <button
                 onClick={handleSignOut}
                 className="w-full px-4 py-2 text-left text-sm flex items-center gap-2 text-foreground/70 hover:text-destructive hover:bg-destructive/5 transition-colors"
@@ -142,6 +143,7 @@ const ProfileMenu = () => {
                 <LogOut className="h-4 w-4" />
                 {t('nav.logout') || 'Sign Out'}
               </button>
+              */}
             </motion.div>
           )}
         </AnimatePresence>

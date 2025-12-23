@@ -346,22 +346,31 @@ const Articles = () => {
 
     const shareUrl = `${window.location.origin}/articles/${article.id}`;
     
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: article.title,
-          text: article.summary || article.title,
-          url: shareUrl,
-        });
-      } catch (err) {
-        console.log("Share cancelled");
-      }
-    } else {
-      await navigator.clipboard.writeText(shareUrl);
+    // Use textarea fallback for reliable clipboard copy
+    const textArea = document.createElement('textarea');
+    textArea.value = shareUrl;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    textArea.style.top = '0';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
       toast({
         title: t('articles.linkCopied') || "Link copied!",
         description: t('articles.shareSuccess') || "Article link copied to clipboard",
       });
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      toast({
+        title: "Error",
+        description: "Failed to copy link",
+        variant: "destructive",
+      });
+    } finally {
+      document.body.removeChild(textArea);
     }
   };
 
@@ -610,7 +619,7 @@ const Articles = () => {
                 )}
 
                 {/* Secondary Articles */}
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {secondaryArticles.map((article, index) => (
                     <Link to={`/articles/${article.id}`} key={article.id}>
                       <motion.article

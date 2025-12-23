@@ -415,8 +415,7 @@ const ArticleDetail = () => {
   const handleShare = () => {
     if (!article) return;
 
-    // Use the edge function URL for rich link previews on social media
-    const shareUrl = `https://tjotexujwnfltszqqovk.supabase.co/functions/v1/article-share?id=${article.id}`;
+    const shareUrl = window.location.href;
 
     // Use reliable textarea-based copy method
     const textArea = document.createElement('textarea');

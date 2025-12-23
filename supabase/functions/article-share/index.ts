@@ -1,3 +1,4 @@
+// Article Share Edge Function for rich link previews on social media
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -21,12 +22,14 @@ function escapeHtml(text: string): string {
 
 function truncateDescription(text: string, maxLength = 160): string {
   if (!text) return "";
-  const cleaned = text.replace(/\s+/g, ' ').trim();
+  const cleaned = text.replace(/\s+/g, " ").trim();
   if (cleaned.length <= maxLength) return cleaned;
   return cleaned.substring(0, maxLength - 3).trim() + "...";
 }
 
 Deno.serve(async (req) => {
+  console.log("Article share function invoked");
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -34,8 +37,10 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const articleId = url.searchParams.get("id");
+    console.log("Requested article ID:", articleId);
 
     if (!articleId) {
+      console.log("Missing article ID");
       return new Response("Missing article ID", {
         status: 400,
         headers: { "Content-Type": "text/plain" },
@@ -53,30 +58,28 @@ Deno.serve(async (req) => {
       .eq("is_published", true)
       .maybeSingle();
 
+    if (error) {
+      console.error("Database error:", error);
+    }
+
     if (error || !article) {
       console.log("Article not found, redirecting to homepage");
       return new Response(null, {
         status: 302,
         headers: {
           ...corsHeaders,
-          "Location": SITE_URL,
+          Location: SITE_URL,
         },
       });
     }
 
-    // Generate description from summary or content
-    const description = truncateDescription(
-      article.summary || article.content
-    );
-    
-    // Use article thumbnail or default OG image
+    const description = truncateDescription(article.summary || article.content);
     const imageUrl = article.thumbnail_url || DEFAULT_OG_IMAGE;
     const articleUrl = `${SITE_URL}/articles/${articleId}`;
 
     console.log(`Generating OG preview for article: ${article.title}`);
     console.log(`Image URL: ${imageUrl}`);
 
-    // Create the HTML page with proper OG meta tags for rich link preview
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -87,7 +90,7 @@ Deno.serve(async (req) => {
     <!-- Primary Meta Tags -->
     <meta name="title" content="${escapeHtml(article.title)}">
     <meta name="description" content="${escapeHtml(description)}">
-    ${article.author ? `<meta name="author" content="${escapeHtml(article.author)}">` : ''}
+    ${article.author ? `<meta name="author" content="${escapeHtml(article.author)}">` : ""}
     
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:type" content="article">
@@ -101,9 +104,9 @@ Deno.serve(async (req) => {
     <meta property="og:image:height" content="630">
     <meta property="og:site_name" content="${SITE_NAME}">
     <meta property="og:locale" content="en_US">
-    ${article.published_at ? `<meta property="article:published_time" content="${article.published_at}">` : ''}
-    ${article.author ? `<meta property="article:author" content="${escapeHtml(article.author)}">` : ''}
-    ${article.category ? `<meta property="article:section" content="${escapeHtml(article.category)}">` : ''}
+    ${article.published_at ? `<meta property="article:published_time" content="${article.published_at}">` : ""}
+    ${article.author ? `<meta property="article:author" content="${escapeHtml(article.author)}">` : ""}
+    ${article.category ? `<meta property="article:section" content="${escapeHtml(article.category)}">` : ""}
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
@@ -143,7 +146,7 @@ Deno.serve(async (req) => {
       status: 302,
       headers: {
         ...corsHeaders,
-        "Location": SITE_URL,
+        Location: SITE_URL,
       },
     });
   }
